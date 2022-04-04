@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      flutter_form_generator|flutter_form_annotations:
+        enabled: true
+
+builders:
+  generators:
+    target: ":flutter_form_generator"
+    import: "package:flutter_form_generator/builder.dart"
+    builder_factories: ["generateForm"]
+    build_extensions: { ".dart": [".g.dart"] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
