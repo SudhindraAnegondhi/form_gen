@@ -260,10 +260,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 // **************************************************************************
 
 Address _$AddressFromJson(Map<String, dynamic> json) => Address(
-      street: json['street'] as String?,
-      city: json['city'] as String?,
-      state: json['state'] as String?,
-      postcode: json['postcode'] as String?,
+      street: json['street'] as String,
+      city: json['city'] as String,
+      state: json['state'] as String,
+      postcode: json['postcode'] as String,
     );
 
 Map<String, dynamic> _$AddressToJson(Address instance) => <String, dynamic>{

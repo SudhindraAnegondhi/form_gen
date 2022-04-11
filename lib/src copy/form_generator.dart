@@ -207,19 +207,17 @@ void generateFormFields(ModelVisitor visitor, StringBuffer classBuffer, String m
     // remove '_' from private variables
     final variable = field.startsWith('_') ? field.replaceFirst('_', '') : field;
     final type = defs[variable]?['type']?.toString() ?? visitor.fields[field]?.toString() ?? 'String';
-    final label = camelCaseToTitleCase(defs[variable]?['label']?.toString() ?? variable);
+    final label = camelCaseToTitleCase(defs[variable]?['label']?.toString() ?? visitor.fields[field]!.toString());
     final fieldname = 'modelMap["$variable"]';
     generateFormField(classBuffer, variable, type, 'modelMap', fieldname, label, defs);
   }
 }
 
 void generateFormField(StringBuffer classBuffer, String variable, String type, String parent, String fieldname, String label, Map<dynamic, dynamic> defs) {
- // print('variable: $variable, type: $type, parent: $parent, fieldname: $fieldname, label: $label');
   //final parent = 'modelMap!' + (model.isEmpty ? '' : '${model.split('.').map((e) => '["$e"]').toList().join()}');
   //final fieldname = parent + '["$variable"]';
   final ftype = defs[variable]?['fieldType']?.toString() ?? 'text';
-  final FormFieldType fieldType = type == 'object' ? FormFieldType.object : FormFieldType.values.firstWhere((e) => e.toString().split('.').last == ftype);
-
+  final FormFieldType fieldType = FormFieldType.values.where((e) => e.toString().split('.').last == ftype).first;
   final validators = defs[variable]?['validators'] == null
       ? '[]'
       : '[' +
@@ -256,14 +254,13 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
               decoration: const InputDecoration(
                 labelText: '$label',
               ),
-              initialValue: $fieldname,
+              initialValue: '$fieldname.toString()',
               onChanged: (value) {
                 setState(() {
                   
-                  $fieldname = ${valueToType(t)}
+                  $fieldname = ValueTransformer<$t>(value);
                 });
               },
-              
               //validator: $validators != null ? FormBuilderValidators.compose[
               //  ...$validators,
                // ] : "null",
@@ -285,10 +282,10 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
                   enabled: '${defs[variable]?['enabled'] ?? true}',
                   keyboardType   ${getKeyboardType(type)},
                   maxLines: '${defs[variable]?['maxLines'] ?? 1}',
-                  initialValue: $fieldname,
+                  initialValue: '$fieldname.toString()',
                   onChanged: (value) {
                     setState(() {
-                      $fieldname = ${valueToType(t)};
+                      $fieldname = value;
                     });
                   },
                 ), // TextFormField
@@ -305,7 +302,7 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
             name: '$variable',
             onChanged: (value) {
                   setState(() {
-                    $fieldname = ${valueToType(t)};
+                    $fieldname = value;
                   });
                 },
             inputType: ${getKeyboardType(type)},
@@ -325,7 +322,7 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
         format: DateFormat('yyyy-MM-dd'),
         onChanged: (value) {
           setState(() {
-            $fieldname = ${valueToType(t)};
+            $fieldname = value;
           });
         },
         decoration: InputDecoration(
@@ -345,12 +342,12 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
         ]),
         onChanged: (value) {
           setState(() {
-            $fieldname = ${valueToType(t)};
+            $fieldname = value;
           });
         },
         min: '${defs[variable]?['min'] ?? 0.0}',
         max: '${defs[variable]?['max'] ?? 100.0}',
-        initialValue: $fieldname,
+        initialValue: '$fieldname',
         divisions: '${defs[variable]?['divisions'] ?? 1}',
         activeColor: '${defs[variable]?['activeColor'] ?? 0xFF1DE9B6}', }',
         inactiveColor: '${defs[variable]?['inactiveColor'] ?? 0x001DE9B6}',
@@ -362,33 +359,26 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
 
       break;
     case FormFieldType.dropdown:
-      if (defs[variable]['values'] != null) {
-        final items = '[' +
-            (defs[variable]['values'] as List<dynamic>)
-                .map((e) => 'const DropdownMenuItem<String>(value: "${e['label'] ?? e['value']}",' + 
-                'child: const Text("${e['label'] ?? e['value']}"))')
-                .toList()
-                .join(',\n') +
-            ']';
-        classBuffer.write('''
-        FormBuilderDropdown(
-          name: '$variable',
-          validator: FormBuilderValidators.compose([
-            FormBuilderValidators.required( errorText: '$label is required'), 
-          ]),
-          onChanged: (value) {
-            setState(() {
-              $fieldname = ${valueToType(t)};
-            });
-          },
-          initialValue: $fieldname,
-          decoration: const InputDecoration(
-            labelText: '$label',
-          ),
-          items:  $items,
+      classBuffer.write('''
+      FormBuilderDropdown(
+        name: '$variable',
+        validator: FormBuilderValidators.compose([
+          FormBuilderValidators.required(context, errorText: '$label is required'), 
+        ]),
+        onChanged: (value) {
+          setState(() {
+            $fieldname = value;
+          });
+        },
+        initialValue: '$fieldname',
+        decoration: InputDecoration(
+          labelText: '$label',
         ),
-        ''');
-      }
+        items: [
+          '${defs[variable]?['items'] ?? []}',
+        ],
+      ),
+      ''');
       break;
     case FormFieldType.radio:
       // TODO: Handle this case.
@@ -412,25 +402,10 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
       // TODO: Handle this case.
       break;
     case FormFieldType.object:
-      final classType = defs[variable]?['class']?.toString();
-      final newParent = parent == 'modelMap' ? ' $fieldname' : '$parent["$variable"]';
-      if (classType != null) {
-        classBuffer.writeln('${classType}Widget(context, modelMap($variable), modelMap)');
-        break;
-      } else {
-        final Map<String, dynamic> properties = (defs[variable]?['properties'] ?? {}) as Map<String, dynamic>;
-        print('--> $variable');
-        properties.forEach((String key, dynamic value) {
-          final type = properties['type']?.toString() ?? 'String';
-          // generateFormField(classBuffer, fieldName, type, newParent, key, properties);
-
-          generateFormField(
-              classBuffer, key, type, parent, '$newParent["$key"]', camelCaseToTitleCase(properties['label']?.toString() ?? key.toString()), properties);
-        });
-      }
+      // TODO: Handle this case.
       break;
   }
-  /*
+
   switch (type) {
     case 'String':
       classBuffer.write('''
@@ -578,7 +553,6 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
     default:
       break;
   }
-  */
 }
 
 /********** REWRITE THIS *********/

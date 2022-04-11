@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_declarations
+
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -27,14 +29,13 @@ class MyApp extends StatelessWidget {
 Future<Widget> getImage() async {
   final Completer<Widget> completer = Completer();
   const url = 'https://picsum.photos/900/600';
-  final image = NetworkImage(url);
+  final image = const NetworkImage(url);
   // final config = await image.obtainKey();
   final load = image.resolve(const ImageConfiguration());
 
   final listener = ImageStreamListener((ImageInfo info, isSync) async {
     if (kDebugMode) {
       print(info.image.width);
-
       print(info.image.height);
     }
 
