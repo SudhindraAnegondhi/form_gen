@@ -28,6 +28,8 @@ class FormGenerator extends GeneratorForAnnotation<GenerateForm> {
     final model = visitor.className[0].toLowerCase() + visitor.className.substring(1);
     // *** Start class
     classBuffer.writeln('''
+// ignore_for_file: unnecessary_const, prefer_const_literals_to_create_immutables, prefer_const_constructors
+
 class $className extends StatefulWidget {
   const $className({ Key? key,   this.$model, required this.add, this.showAppBar = false, this.appBar,
   this.size, this.textStyle, this.color, this.textColor, this.headlineStyle, 
@@ -56,8 +58,12 @@ class _${className}State extends State<$className> {
   @override
   void initState() {
     super.initState();
-    modelMap = widget.$model?.toJson() ?? <String, dynamic>{};
-    initModel();
+    if(widget.$model != null) {
+      modelMap = widget.$model.toMap();
+    } else {
+      initModel();
+    }
+   
   }
 
   ''');
@@ -161,6 +167,7 @@ void initModel(ModelVisitor visitor, StringBuffer classBuffer, String model, Map
 
 void initProperty(StringBuffer classBuffer, String fieldname, String parentField, String type, String model, Map<String, dynamic> defs) {
   switch (type) {
+    /*
     case 'String':
       classBuffer.writeln('''$fieldname ??= ''; ''');
       break;
@@ -182,6 +189,10 @@ void initProperty(StringBuffer classBuffer, String fieldname, String parentField
     case 'Map':
       classBuffer.writeln('''   $fieldname ??= <String, dynamic>{}; ''');
       break;
+    case 'enum':
+      classBuffer.writeln('''   $fieldname ??= ${defs[parentField]?['values'][0]?.toString() ?? 'null'}; ''');
+      break;
+      */
     case 'object':
       final Map<String, dynamic> properties = (defs[parentField]?['properties'] ?? {}) as Map<String, dynamic>;
 
@@ -193,6 +204,9 @@ void initProperty(StringBuffer classBuffer, String fieldname, String parentField
         final newFieldmame = '$fieldname["$key"]';
         initProperty(classBuffer, newFieldmame, key, type, model, defs);
       });
+      break;
+    default:
+      classBuffer.writeln('''$fieldname = null; ''');
   }
 }
 
@@ -214,14 +228,14 @@ void generateFormFields(ModelVisitor visitor, StringBuffer classBuffer, String m
 }
 
 void generateFormField(StringBuffer classBuffer, String variable, String type, String parent, String fieldname, String label, Map<dynamic, dynamic> defs) {
- // print('variable: $variable, type: $type, parent: $parent, fieldname: $fieldname, label: $label');
+  // print('variable: $variable, type: $type, parent: $parent, fieldname: $fieldname, label: $label');
   //final parent = 'modelMap!' + (model.isEmpty ? '' : '${model.split('.').map((e) => '["$e"]').toList().join()}');
   //final fieldname = parent + '["$variable"]';
   final ftype = defs[variable]?['fieldType']?.toString() ?? 'text';
   final FormFieldType fieldType = type == 'object' ? FormFieldType.object : FormFieldType.values.firstWhere((e) => e.toString().split('.').last == ftype);
 
   final validators = defs[variable]?['validators'] == null
-      ? '[]'
+      ? null
       : '[' +
           (defs[variable]['validators'] as List)
               .map((e) {
@@ -240,7 +254,7 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
                 if ((type == 'date' || type == 'datetime')) {
                   return 'FormBuilderValidators.date(context, errorText: "$label is not a valid date")';
                 }
-                return e; // validator function of the form (value) => error ? errorText : null
+                return null; // validator function of the form (value) => error ? errorText : null
               })
               .toList()
               .join(', ') +
@@ -250,53 +264,46 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
     case FormFieldType.text:
       classBuffer.write('''
          FormBuilderTextField(
-              name: '$variable',
-              enabled: ${defs[variable]?['enabled'] ?? true},
-              keyboardType: ${getKeyboardType(type)},
-              decoration: const InputDecoration(
-                labelText: '$label',
-              ),
-              initialValue: $fieldname,
-              onChanged: (value) {
-                setState(() {
-                  
-                  $fieldname = ${valueToType(t)}
-                });
-              },
-              
-              //validator: $validators != null ? FormBuilderValidators.compose[
-              //  ...$validators,
-               // ] : "null",
-            ),\n
-          ''');
+            name: '$variable',
+            enabled: ${defs[variable]?['enabled'] ?? true},
+            keyboardType: ${getKeyboardType(type)},
+            decoration: const InputDecoration(
+              labelText: '$label',
+            ),
+            initialValue: $fieldname,
+            // maxLine: ${defs[variable]?['maxLine'] ?? (fieldType == FormFieldType.textarea ? 3 : 1)},
+            onChanged: (value) {
+              setState(() {
+                $fieldname = ${valueToType(t)}
+              });
+            },
+          ),\n
+        ''');
       break;
     case FormFieldType.textarea:
       classBuffer.write('''
-         FormBuilderField(
-              name: '$variable',
-              validator: $validators != null ? FormBuilderValidators.compose[
-                ...$validators,
-                ] : "null",
-              builder: (FormFieldState<dynamic> field) {
-                return InputDecoration(
-                  labelText: '$label',
+        FormBuilderField(
+          name: '$variable',
+          builder: (FormFieldState<dynamic> field) {
+            return InputDecorator(
+              decoration: InputDecoration(
+                labelText: '$label',
+              ),
+              child: TextFormField(
+                maxLines: ${defs[variable]?['maxLine'] ?? 3},
+                enabled: ${defs[variable]?['enabled'] ?? true},
+                initialValue: modelMap["description"],
+                keyboardType: TextInputType.text,
+                onChanged: (value) {
+                  setState(() {
+                    $fieldname = ${valueToType(t)}
+                  });
                 },
-                child: TextFormField(
-                  enabled: '${defs[variable]?['enabled'] ?? true}',
-                  keyboardType   ${getKeyboardType(type)},
-                  maxLines: '${defs[variable]?['maxLines'] ?? 1}',
-                  initialValue: $fieldname,
-                  onChanged: (value) {
-                    setState(() {
-                      $fieldname = ${valueToType(t)};
-                    });
-                  },
-                ), // TextFormField
-                ), // InputDecoration
-              }, // builder
-           
-            ),\n
-          ''');
+              ),
+            );
+          },
+        ),
+    ''');
       break;
     case FormFieldType.dateTimePicker:
       classBuffer.write('''
@@ -365,8 +372,7 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
       if (defs[variable]['values'] != null) {
         final items = '[' +
             (defs[variable]['values'] as List<dynamic>)
-                .map((e) => 'const DropdownMenuItem<String>(value: "${e['label'] ?? e['value']}",' + 
-                'child: const Text("${e['label'] ?? e['value']}"))')
+                .map((e) => 'const DropdownMenuItem<String>(value: "${e['value']}",' + 'child: const Text("${e['label'] ?? e['value']}"))')
                 .toList()
                 .join(',\n') +
             ']';
@@ -378,7 +384,7 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
           ]),
           onChanged: (value) {
             setState(() {
-              $fieldname = ${valueToType(t)};
+              $fieldname = ${valueToType(t)}
             });
           },
           initialValue: $fieldname,
