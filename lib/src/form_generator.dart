@@ -79,8 +79,8 @@ class _${className}State extends State<$className> {
       appBar: widget.showAppBar ? widget.appBar : null,
     body: Center(child:
     Container(
-      width: widget.size?.width ?? MediaQuery.of(context).size.width * 0.8,
-      height: widget.size?.height ?? min(MediaQuery.of(context).size.height * 0.8, ${visitor.fields.keys.length}  * 85),
+      width: widget.size?.width ?? MediaQuery.of(context).size.width,
+      height: widget.size?.height ?? min(MediaQuery.of(context).size.height - (widget.showAppBar ? AppBar().preferredSize.height: 0), ${visitor.fields.keys.length}  * 85),
       color: widget.backgroundColor ?? Colors.white,
       child: Card(
         elevation: 15,
@@ -166,36 +166,8 @@ void initModel(ModelVisitor visitor, StringBuffer classBuffer, String model, Map
 }
 
 void initProperty(StringBuffer classBuffer, String fieldname, String parentField, String type, String model, Map<String, dynamic> defs) {
-  switch (type) {
-    /*
-    case 'String':
-      classBuffer.writeln('''$fieldname ??= ''; ''');
-      break;
-    case 'int':
-      classBuffer.writeln('''$fieldname ??= 0;''');
-      break;
-    case 'double':
-      classBuffer.writeln('''$fieldname ??= 0.0;''');
-      break;
-    case 'bool':
-      classBuffer.writeln('''    $fieldname ??= false; ''');
-      break;
-    case 'DateTime':
-      classBuffer.writeln('''   $fieldname ??= DateTime.now(); ''');
-      break;
-    case 'List':
-      classBuffer.writeln('''   $fieldname ??= <dynamic>[]; ''');
-      break;
-    case 'Map':
-      classBuffer.writeln('''   $fieldname ??= <String, dynamic>{}; ''');
-      break;
-    case 'enum':
-      classBuffer.writeln('''   $fieldname ??= ${defs[parentField]?['values'][0]?.toString() ?? 'null'}; ''');
-      break;
-      */
-    case 'object':
+  if (type == 'object') {
       final Map<String, dynamic> properties = (defs[parentField]?['properties'] ?? {}) as Map<String, dynamic>;
-
       classBuffer.write('''
            $fieldname  = <String, dynamic> {};
           ''');
@@ -204,8 +176,7 @@ void initProperty(StringBuffer classBuffer, String fieldname, String parentField
         final newFieldmame = '$fieldname["$key"]';
         initProperty(classBuffer, newFieldmame, key, type, model, defs);
       });
-      break;
-    default:
+  } else {
       classBuffer.writeln('''$fieldname = null; ''');
   }
 }
