@@ -59,7 +59,7 @@ class _${className}State extends State<$className> {
   void initState() {
     super.initState();
     if(widget.$model != null) {
-      modelMap = widget.$model.toMap();
+      modelMap = widget.$model!.toJson();
     } else {
       initModel();
     }
@@ -372,7 +372,9 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
       if (defs[variable]['values'] != null) {
         final items = '[' +
             (defs[variable]['values'] as List<dynamic>)
-                .map((e) => 'const DropdownMenuItem<String>(value: "${e['value']}",' + 'child: const Text("${e['label'] ?? e['value']}"))')
+                .map((e) =>
+                    'const DropdownMenuItem<String>(value: "${e['value'].toString().split('.').last}",' +
+                    'child: const Text("${e['label'] ?? e['value'].toString().split('.').last}"))')
                 .toList()
                 .join(',\n') +
             ']';
@@ -387,7 +389,7 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
               $fieldname = ${valueToType(t)}
             });
           },
-          initialValue: $fieldname,
+          initialValue: ${fieldname.toString().split('.').last},
           decoration: const InputDecoration(
             labelText: '$label',
           ),
