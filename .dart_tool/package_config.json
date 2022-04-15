@@ -155,7 +155,7 @@
       "name": "flutter_form_annotations",
       "rootUri": "../../flutter_form_annotations",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "2.16"
     },
     {
       "name": "frontend_server_client",
@@ -413,10 +413,10 @@
       "name": "flutter_form_generator",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "2.16"
     }
   ],
-  "generated": "2022-04-10T11:09:53.642263Z",
+  "generated": "2022-04-14T16:51:40.895Z",
   "generator": "pub",
   "generatorVersion": "2.16.2"
 }

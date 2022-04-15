@@ -8,6 +8,7 @@ import 'package:flutter_form_annotations/flutter_form_annotations.dart';
 import 'model_visitor.dart';
 import 'validate_defs.dart';
 
+
 class FormGenerator extends GeneratorForAnnotation<GenerateForm> {
   @override
   String generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep) {
@@ -24,6 +25,7 @@ class FormGenerator extends GeneratorForAnnotation<GenerateForm> {
     } catch (e) {
       print(e);
     }
+
 
     final model = visitor.className[0].toLowerCase() + visitor.className.substring(1);
     // *** Start class
@@ -167,17 +169,17 @@ void initModel(ModelVisitor visitor, StringBuffer classBuffer, String model, Map
 
 void initProperty(StringBuffer classBuffer, String fieldname, String parentField, String type, String model, Map<String, dynamic> defs) {
   if (type == 'object') {
-      final Map<String, dynamic> properties = (defs[parentField]?['properties'] ?? {}) as Map<String, dynamic>;
-      classBuffer.write('''
+    final Map<String, dynamic> properties = (defs[parentField]?['properties'] ?? {}) as Map<String, dynamic>;
+    classBuffer.write('''
            $fieldname  = <String, dynamic> {};
           ''');
-      properties.forEach((String key, dynamic value) {
-        final type = properties['type']?.toString() ?? 'String';
-        final newFieldmame = '$fieldname["$key"]';
-        initProperty(classBuffer, newFieldmame, key, type, model, defs);
-      });
+    properties.forEach((String key, dynamic value) {
+      final type = properties['type']?.toString() ?? 'String';
+      final newFieldmame = '$fieldname["$key"]';
+      initProperty(classBuffer, newFieldmame, key, type, model, defs);
+    });
   } else {
-      classBuffer.writeln('''$fieldname = null; ''');
+    classBuffer.writeln('''$fieldname = null; ''');
   }
 }
 
@@ -194,6 +196,7 @@ void generateFormFields(ModelVisitor visitor, StringBuffer classBuffer, String m
     final type = defs[variable]?['type']?.toString() ?? visitor.fields[field]?.toString() ?? 'String';
     final label = camelCaseToTitleCase(defs[variable]?['label']?.toString() ?? variable);
     final fieldname = 'modelMap["$variable"]';
+
     generateFormField(classBuffer, variable, type, 'modelMap', fieldname, label, defs);
   }
 }
