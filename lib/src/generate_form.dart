@@ -8,22 +8,22 @@ import 'model_visitor.dart';
 class GenerateForm extends GeneratorForAnnotation<GenerateForm> {
   @override
   String generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep) {
-    print('GenerateForm');
+   
     final buffer = StringBuffer();
     final ModelVisitor visitor = ModelVisitor();
     element.visitChildren(visitor);
     print(element.toString());
-    final className = '${visitor.className}Screen'; // EX: 'ModelScreen' for 'Model'.
+    final className = '${visitor.className}Page'; // EX: 'ModelPage' for 'Model'.
     final model = visitor.className[0].toLowerCase() + visitor.className.substring(1);
     print(model);
-    /*
+    
     final List<Map<String, dynamic>> fields = getModelFields(element as ClassElement, annotation);
     
     generateHeader(buffer, className, visitor.className, model, fields);
-    print(buffer.toString());
+   
     generateFields(buffer, fields);
     generateFooter(buffer, className);
-    */
+    
     return buffer.toString();
   }
 
@@ -147,6 +147,7 @@ class GenerateForm extends GeneratorForAnnotation<GenerateForm> {
       for (final arg in args) {
         field['meta'][arg.split(' ').last] = getValue(annotation, f, arg);
       }
+      fields.add(field);
     } // assembled fields - now to handle sorting, followed by nested fields
     if (fields.any((f) => f['sequence'] != null)) {
       // sort fields by sequence even if one object's sequence is set

@@ -8,7 +8,7 @@ builders:
   generators:
     target: ":flutter_form_generator"
     import: "package:flutter_form_generator/builder.dart"
-    builder_factories: ["formGenerator", "lookupGenerator"]
+    builder_factories: ["lookupGenerator"]
     build_extensions: { ".dart": [".g.dart"] }
     auto_apply: dependents
     build_to: cache
