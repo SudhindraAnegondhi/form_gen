@@ -1,12 +1,15 @@
 // ignore_for_file: lines_longer_than_80_chars, omit_local_variable_types
 
+import 'dart:convert';
+
 import 'package:build/src/builder/build_step.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:flutter_form_annotations/flutter_form_annotations.dart';
+import 'form_builder.dart';
 import 'model_visitor.dart';
 
-class LookupGenerator extends GeneratorForAnnotation<GenerateForm> {
+class LookupGenerator extends GeneratorForAnnotation<FormBuilder> {
   @override
   String generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep) {
     /*
@@ -30,8 +33,8 @@ class LookupGenerator extends GeneratorForAnnotation<GenerateForm> {
     return buffer.toString();
   }
 
-  dynamic getValue(String annotation, FieldElement f, String arg) {
-    final typeChecker = TypeChecker.fromRuntime(annotations[annotation]!);
+  dynamic getValue(String annotationName, FieldElement f, ConstantReader annotation, String arg) {
+    final typeChecker = TypeChecker.fromRuntime(annotations[annotationName]!);
     dynamic value;
     final argType = arg.split(' ').first;
     final argName = arg.split(' ').last;
@@ -54,25 +57,31 @@ class LookupGenerator extends GeneratorForAnnotation<GenerateForm> {
           value = dateStr == null ? null : DateTime.parse(dateStr);
           break;
         case 'List<String>':
-          value = typeChecker.firstAnnotationOf(f)?.getField('$argName')?.toListValue()?.map((e) => e.toStringValue()).toList();
+          //value = typeChecker.firstAnnotationOf(f)?.getField('$argName')?.toListValue()?.map((e) => e.toStringValue()).toList();
+         final str = annotation.read('$argName').literalValue as String;
+          value = jsonDecode(str) as List<String>;
           break;
         case 'List<int>':
-          value = typeChecker.firstAnnotationOf(f)?.getField('$argName')?.toListValue()?.map((e) => e.toIntValue()).toList();
+          //value = typeChecker.firstAnnotationOf(f)?.getField('$argName')?.toListValue()?.map((e) => e.toIntValue()).toList();
+          final str = annotation.read('$argName').literalValue as String;
+          value = jsonDecode(str) as List<int>;
           break;
-        case 'Map<String, dynamic>':
-          final val = typeChecker.firstAnnotationOf(f)?.getField('$argName')?.toMapValue();
-          value = val?.map((k, v) => MapEntry(k?.toStringValue(), v));
+        case 'Map<String,dynamic>':
+          //final val = typeChecker.firstAnnotationOf(f)?.getField('$argName')?.toMapValue();
+          //value = val?.map((k, v) => MapEntry(k?.toStringValue(), v));
+          final str = annotation.read('$argName').literalValue as String;
+          value = jsonDecode(str) as Map<String, dynamic>;
           break;
-        case 'List<Map<String, dynamic>>':
-          value = typeChecker
-              .firstAnnotationOf(f)
-              ?.getField('$argName')
-              ?.toListValue()
-              ?.map((e) => e.toMapValue()?.map((k, v) => MapEntry(k?.toStringValue(), v?.toStringValue())))
-              .toList();
+        case 'List<Map<String,dynamic>>':
+          //final list = typeChecker.firstAnnotationOf(f)?.getField('$argName')?//.toListValue();
+          //print('***** List: $list');
+          final str = annotation.read('$argName').literalValue as String;
+          value = jsonDecode(str) as List<Map<String, dynamic>>;
+          print(value.toString());
           break;
         default:
-          value = typeChecker.firstAnnotationOf(f)?.getField('$argName')?.toStringValue();
+          // value = typeChecker.firstAnnotationOf(f)?.getField('$argName')?.toStringValue();
+          value = annotation.read('$argName').literalValue as String;
           break;
       }
     }
@@ -98,35 +107,37 @@ class LookupGenerator extends GeneratorForAnnotation<GenerateForm> {
         'name': f.name,
         'type': f.type.toString(),
       };
+      String annotationName = '';
       final metaData = f.metadata.map((e) {
-        final annotation = e.toString().replaceAll('@', '').replaceAll('[', '').replaceAll(']', '').split(' ').first;
-        if (annotation.isEmpty || annotations[annotation] != null) {
-          return e.toString();
+        final meta = e.toString().replaceAll('@', '').replaceAll('[', '').replaceAll(']', '');
+        final _annotation = meta.split(' ').first;
+        if (_annotation.isEmpty || annotations[_annotation] != null) {
+          annotationName = _annotation;
+          return meta;
         }
         return null;
-      }).toList()
-        ..removeWhere((element) => element == null);
+      }).toList();
       //  final meta = f.metadata.map((e) => e.toString()).toList().toString().replaceAll('@', '').replaceAll('[', '').replaceAll(']', '');
-      final meta = metaData.isNotEmpty ? metaData[0]! : '';
-
-      String annotation = meta.split(' ').first;
-
-      if (annotation.isEmpty) {
-        annotation = 'FieldText'; // default
+      final meta = metaData.isNotEmpty ? metaData[0] ?? '' : ''; // pnly one field decorator per field accepted.
+      print('Meta: $meta');
+      if (annotationName.isEmpty) {
+        annotationName = 'FieldText'; // default
       }
-      if (annotations[annotation] == null) {
+      field['annotation'] = annotationName;
+      if (annotations[annotationName] == null) {
         // ignore unknown annotations
         fields.add(field);
         continue;
       }
-      field['annotation'] = annotation;
-
       final args = getArguments(meta);
       if (field['type'] == 'Address') {
-        print('Meta: $meta');
+        print('Meta: $meta\nArgs: ${args.join('\n')}');
       }
       for (final arg in args) {
-        final value = getValue(annotation, f, arg!);
+        final value = getValue(annotationName, f, annotation, arg!);
+        if (field['annotation'] == 'FieldClass') {
+          print('Arg: $arg\nValue: $value');
+        }
         if (value != null) {
           if (field['meta'] == null) {
             field['meta'] = <String, dynamic>{};
@@ -177,7 +188,7 @@ class LookupGenerator extends GeneratorForAnnotation<GenerateForm> {
   List<Map<String, dynamic>> decodeMeta(Map<String, dynamic> field) {
     final List<Map<String, dynamic>> nestedfields = [];
     double sequence = (field['sequence'] ?? 0) as double;
-    for (final key in field['meta']['properties']?.keys ?? []) {
+    for (final key in field['meta']?['properties']?.keys ?? []) {
       sequence = sequence + 0.1;
       final Map<String, dynamic> nestedField = <String, dynamic>{
         'name': key,

@@ -42,9 +42,8 @@ class ModelVisitor extends SimpleElementVisitor<dynamic> {
   String className = '';
 
   Map<String, dynamic> fields = <String, dynamic>{};
-   Map<String, dynamic> defs = <String, dynamic>{};
-
-   
+  Map<String, dynamic> defs = <String, dynamic>{};
+  Map<String, dynamic> metaData = <String, dynamic>{};
 
   @override
   dynamic visitConstructorElement(ConstructorElement element) {
@@ -62,5 +61,6 @@ class ModelVisitor extends SimpleElementVisitor<dynamic> {
     // DartType ends with '*', which needs to be eliminated
     // for the generated code to be accurate.
     fields[element.name] = elementType.replaceFirst('*', '');
+    metaData[element.name] = element.metadata;
   }
 }

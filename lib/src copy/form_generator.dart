@@ -8,7 +8,7 @@ import 'package:flutter_form_annotations/flutter_form_annotations.dart';
 import 'model_visitor.dart';
 import 'validate_defs.dart';
 
-class FormGenerator extends GeneratorForAnnotation<GenerateForm> {
+class FormGenerator extends GeneratorForAnnotation<FormBuilder> {
   @override
   String generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep) {
     final ModelVisitor visitor = ModelVisitor();
@@ -555,35 +555,4 @@ void generateFormField(StringBuffer classBuffer, String variable, String type, S
   }
 }
 
-/********** REWRITE THIS *********/
 
-class SubFormGenerator extends GeneratorForAnnotation<GenerateSubForm> {
-  @override
-  String generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep) {
-    final ModelVisitor visitor = ModelVisitor();
-    element.visitChildren(visitor); // Visits all the children of element in no particular order.
-
-    final widgetName = '${visitor.className}Widget'; // EX: 'ModelWidget' for 'Model'.
-
-    final classBuffer = StringBuffer();
-    Map<dynamic, dynamic> defs = <dynamic, dynamic>{};
-    try {
-      defs = annotation.read('defs').mapValue;
-    } catch (e) {}
-    final model = visitor.className[0].toLowerCase() + visitor.className.substring(1);
-    // *** Start class
-
-    classBuffer.write('''
-     Widget $widgetName(BuildContext context, String  $model) {
-       return  Column(
-          children: <Widget>[
-    ''');
-    generateFormFields(visitor, classBuffer, model, defs);
-    classBuffer.write('''
-          ],
-        );
-      ''');
-
-    return classBuffer.toString();
-  }
-}
