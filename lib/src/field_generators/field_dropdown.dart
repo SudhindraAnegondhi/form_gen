@@ -14,64 +14,42 @@ class FieldDropdownBuilder extends GeneratorForAnnotatedField<FieldDropdown> {
   @override
   String generateForAnnotatedField(FieldElement element, ConstantReader annotation, BuildStep buildstep) {
     final buffer = StringBuffer();
-    final map = annotationToJson(element, $properties);
+    final properties = getClassProperties(FieldDropdown);
+    final map = annotationToJson(element, properties);
+    String items;
+    String initialValue;
     if (map['type'] == 'enum') {
-      buffer.write('''
-        Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {Function? onSaved}) {
-          return DropdownButtonFormField<String>(
-            value: _formData['${element.name}'],
-            decoration: InputDecoration(
-              labelText: '${map['label']}',
-              hintText: '${map['hint']}',
-              helperText: '${map['helper']}',
-              errorText: '${map['error']}',
-            ),
-            items: ${element.name[0].toUpperCase() + element.name.substring(1)}.values.map((value) {
+      items = '''
+       ${element.name[0].toUpperCase() + element.name.substring(1)}.values.map((value) {
               return DropdownMenuItem(
                 value: value.toString().split('.').last,
                 child: Text(value.toString().split('.').last),
               );
-            }).toList(),
-            onChanged:  onSaved == null ? null : (value) => onSaved(value),
-            validator: (value) {
-              if (value == null) {
-                return '${map['error']}';
-              }
-              return null;
-            },
-          );
-        }
-      ''');
+            }).toList()
+      ''';
+      initialValue = '${element.name[0].toUpperCase() + element.name.substring(1)}.values.first.toString().split(\'.\').last';
     } else {
-      final items = (map['options'] as List<Map<String, dynamic>>)
+       items = '[' + (map['options'] as List<Map<String, dynamic>>)
               .map((e) =>
                   'const DropdownMenuItem<String>(value: "${e['value'].toString().split('.').last}",' +
                   'child: const Text("${e['label'] ?? e['value'].toString().split('.').last}"))')
               .toList()
               .join(',\n') +
           ']';
-      buffer.write('''
-      Widget ${element.name}FormField(BuildContext context) {
-        return DropdownButtonFormField(
-          value: _formData[${element.name}],
-          decoration: InputDecoration(
-            labelText: '${map['label']}',
-            hintText: '${map['hint']}',
-            helperText: '${map['helper']}',
-            errorText: '${map['error']}',
-          ),
-          items: $items,
-          onChanged: (value) => _formData(${element.name}) = value,
-          validator: (value) {
-            if (value == null) {
-              return '${map['error']}';
-            }
-            return null;
-          },
-        );
+    initialValue = (map['options'] as List<Map<String, dynamic>>)
+              .map((e) =>
+                  "'e['value'].toString()'")
+              .toList()
+              .first;
+    }
+    buffer.write('''
+      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {Function? onSaved}) {
+        return ${dropdownField(element.name, items, initialValue, map)};
       }
     ''');
-    }
+
     return buffer.toString();
   }
 }
+
+

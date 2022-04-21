@@ -6,7 +6,6 @@ import 'package:build/src/builder/build_step.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:flutter_form_annotations/flutter_form_annotations.dart';
-import 'form_builder.dart';
 import 'model_visitor.dart';
 
 class LookupGenerator extends GeneratorForAnnotation<FormBuilder> {

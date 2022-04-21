@@ -3,23 +3,8 @@
 
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
-
 import 'src/form_builder.dart';
 import 'src/field_generators/field_generators.dart';
-/*
-import 'src/lookup_generator.dart';
-
-import 'src/form_generator.dart';
-import 'src/generate_form.dart';
-
-
-Builder generateForm(BuilderOptions options) => SharedPartBuilder([GenerateForm()], 'generate_form');
-
-Builder formGenerator(BuilderOptions options) => SharedPartBuilder([FormGenerator()], 'form_generator');
-Builder lookupGenerator(BuilderOptions options) => SharedPartBuilder([LookupGenerator()], 'lookup_generator');
-*/
-
-
 
 Builder formBuilder(BuilderOptions options) => SharedPartBuilder([FormBuilderGenerator(), FieldTextBuilder()], 'form_builder');
 
@@ -47,3 +32,4 @@ Builder fieldSwitchBuilder(BuilderOptions options) => SharedPartBuilder([FieldSw
 
 Builder fieldTextAreaBuilder(BuilderOptions options) => SharedPartBuilder([FieldTextAreaBuilder()], 'field_text_area_builder');
 
+Builder fieldClassBuilder(BuilderOptions options) => SharedPartBuilder([FieldClassBuilder()], 'field_class_builder');

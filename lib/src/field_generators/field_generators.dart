@@ -10,3 +10,4 @@ export 'field_radio_group.dart';
 export 'field_range_slider.dart';
 export 'field_switch.dart';
 export 'field_text_area.dart';
+export 'field_class.dart';

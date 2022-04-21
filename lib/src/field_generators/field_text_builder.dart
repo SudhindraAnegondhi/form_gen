@@ -13,25 +13,16 @@ class FieldTextBuilder extends GeneratorForAnnotatedField<FieldText> {
   @override
   String generateForAnnotatedField(FieldElement element, ConstantReader annotation, BuildStep buildstep) {
     final buffer = StringBuffer();
-    final map = annotationToJson(element, $properties);
+    final properties = getClassProperties(FieldText);
+    final map = annotationToJson(element, properties);
+    print(properties.toString());
+    print(map.toString());
+    buffer.write('''
+    // ${properties.toString()}
+''');
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {Function? onSaved}) {
-        return TextFormField(
-          initialValue: _formData['${element.name}'] ?? '',
-          decoration: InputDecoration(
-            labelText: '${map['label']}',
-            hintText: '${map['hint']}',
-            helperText: '${map['helper']}',
-            errorText: '${map['error']}',
-          ),
-          onSaved: onSaved == null ? null :  (value) => onSaved(value),
-          validator: (value) {
-            if (value == null) {
-              return '${map['error']}';
-            }
-            return null;
-          },
-        );
+        return ${textField(element.name, map)};
       }
     ''');
     return buffer.toString();
