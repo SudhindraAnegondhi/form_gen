@@ -15,7 +15,8 @@ class FieldImagePickerBuilder extends GeneratorForAnnotatedField<FieldImagePicke
   @override
   String generateForAnnotatedField(FieldElement element, ConstantReader annotation, BuildStep buildstep) {
     final buffer = StringBuffer();
-    final map = annotationToJson(element, $properties);
+    final properties = getClassProperties(FieldImagePicker);
+    final map = annotationToJson(element, properties);
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context) {
         return ImagePickerFormField(

@@ -4,6 +4,9 @@ import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
+import 'validators.dart' show validatorsMap;
+
+const _dartTypes = ['int', 'double', 'DateTime', 'String', 'bool', 'List', 'Map'];
 
 abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   /// Returns the annotation of type [AnnotationType] of the given [element],
@@ -62,7 +65,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         map[strKey] = mapObj?[objKey]?.toStringValue();
       }
       return map;
-    } else if (type == 'List<Map<String, dynamic>>') {
+    } else if (type == 'List<Map<String, dynamic>>' || type == 'List<Map<String, String>>') {
       final List<Map<String, dynamic>?> list = [];
       final items = annotation?.getField(property)?.toListValue();
       print('ITEMS:' + items.toString());
@@ -73,7 +76,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         for (final DartObject? objKey in mapObjKeys ?? []) {
           final String strKey = objKey?.toStringValue() ?? '  ';
           map[strKey] = mapObj?[objKey]
-              ?.toStringValue();  // _annotationToValue(strKey, (properties[strKey] ?? 'String') as String, mapObj[objKey] as DartObject, properties);
+              ?.toStringValue(); // _annotationToValue(strKey, (properties[strKey] ?? 'String') as String, mapObj[objKey] as DartObject, properties);
         }
         list.add(map);
       }
@@ -83,6 +86,42 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     } else {
       throw Exception('Unknown type: $type');
     }
+  }
+
+  static bool classExists(String className) {
+    try {
+      if (_dartTypes.contains(className)) {
+        print('$className is a dart type');
+        return false;
+      }
+      final DeclarationMirror? cm = currentMirrorSystem().isolate.rootLibrary.declarations[Symbol(className)];
+      if (cm != null) {
+        print('$className is a class');
+        return true;
+      } else {
+        print('$className is not a class');
+        return false;
+      }
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  static Map<String, String> getClassNameProperties(String className) {
+    final Map<String, String> properties = <String, String>{};
+    final DeclarationMirror? cm = currentMirrorSystem().isolate.rootLibrary.declarations[Symbol(className)];
+    print(currentMirrorSystem().isolate.rootLibrary.declarations.toString());
+    if (cm is ClassMirror) {
+      for (final DeclarationMirror dm in cm.declarations.values) {
+        if (dm is VariableMirror) {
+          final String name = MirrorSystem.getName(dm.simpleName);
+          final String type = MirrorSystem.getName(dm.type.simpleName);
+          properties[name] = type;
+        }
+      }
+    }
+    return properties;
   }
 
   Map<String, String> getClassProperties(Type type) {
@@ -96,7 +135,6 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     return properties;
   }
 
-
   Map<String, dynamic> annotationToJson(Element element, Map<String, dynamic> properties) {
     final json = <String, dynamic>{};
     final DartObject? annotation = getAnnotation(element);
@@ -106,32 +144,67 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     return json;
   }
 
-  String textField(String elementName, Map<String, dynamic> map) {
+  String composeValidators(List<Map<String, dynamic>?> validators) {
+    final _validators = validators.map((e) {
+      final func = e!['type'] == null ? e['validator'] : validatorsMap[e['type'] as String];
+      if (func == null) {
+        throw Exception('Unknown validator type: ${e['type']}');
+      }
+      return '''
+          result = $func(value);
+          String  message = '${e['message'] ?? ''}';
+          if (result != null) {
+            errors.add(message.isEmpty ? result : message);
+          }
+      ''';
+    }).toList();
+
+    return ''' 
+    {
+      List<String> errors =[];
+      ${_validators.join('\n')}
+      return errors.isEmpty ? null : errors.join('\\n');
+    }
+    ''';
+  }
+
+  // text properties
+  // inputDecorators - fillColor, filled, errorMaxLines, errorStyle
+  // textInputAction
+  // ignore: avoid_annotating_with_dynamic
+  String textField(String elementName, String elementType, Map<String, dynamic> map, {String? parent}) {
+    final initialValue = map['initialValue'] ?? '';
     return '''
-     TextFormField(
-        initialValue: _formData['${elementName}'] ?? '',
+  
+   TextFormField(
+        initialValue: ${parent == null ? "_formData['$elementName'] ?? '$initialValue'" : "_formData['$parent']['$elementName'] ?? '$initialValue'"},
         decoration: const InputDecoration(
           labelText: '${map['label'] ?? elementName[0].toUpperCase() + elementName.substring(1)}',
+          labelStyle: ${map['labelStyle'] ?? 'TextStyle(fontSize: 16.0, color: Colors.black)'},
           hintText: '${map['hint'] ?? ''}',
           helperText: '${map['helper'] ?? ''}',
           errorText: '${map['error'] ?? ''}',
+          fillColor: ${map['fillColor'] ?? 'Colors.white'},
+          filled:${map['filled'] ?? 'true'},
+          errorMaxLines: ${map['errorMaxLines'] ?? '1'},
+          errorStyle: ${map['errorStyle'] ?? 'TextStyle( color: Colors.red, fontSize: 12.0 )'},
+          border: ${map['border'] ?? 'InputBorder.none'},
         ),
-        onSaved: onSaved == onSaved ? null :  (value) => onSaved!(value),
+        onSaved: (value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
+        onChanged:(value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
         maxLines: ${map['maxLines'] ?? 1},
-        validator: (value) {
-          if (value == null) {
-            return '${map['error']}';
-          }
-          return null;
-        },
-      )''';
+        keyboardType: TextInputType.${map['keyboardType'] ?? 'text'},
+        inputFormatters: ${map['inputFormatters'] ?? 'null'},
+      ) // TextFormField
+    ''';
   }
 
   // ignore: avoid_annotating_with_dynamic
-  String dropdownField(String elementName, String items, String initialValue, Map<String, dynamic> map) {
+  String dropdownField(String elementName, String items, String initialValue, Map<String, dynamic> map, {String? parent}) {
     return '''
     DropdownButtonFormField(
-          value: _formData['$elementName'] ?? $initialValue,
+          value: ${parent == null ? "_formData['$elementName'] ?? $initialValue" : "_formData['$parent']['$elementName'] ?? $initialValue"},
+   
           decoration: const InputDecoration(
             labelText: '${map['label'] ?? elementName[0].toUpperCase() + elementName.substring(1)}',
             hintText: '${map['hint'] ?? ''}',
@@ -139,10 +212,10 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
             errorText: '${map['error'] ?? ''}',
           ),
           items: $items,
-          onChanged: onSaved == null ? null : (value) => onSaved(value),
+          onChanged:  (value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
           validator: (value) {
             if (value == null) {
-              return '${map['error']}';
+              return '${map['error']} ?? "Please select a value"';
             }
             return null;
           },

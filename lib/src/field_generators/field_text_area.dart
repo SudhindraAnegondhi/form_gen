@@ -8,7 +8,6 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:flutter_form_annotations/flutter_form_annotations.dart';
 import '../generator_for_annotated_field.dart';
-import '../model_visitor.dart';
 
 class FieldTextAreaBuilder extends GeneratorForAnnotatedField<FieldTextArea> {
   @override
@@ -17,8 +16,8 @@ class FieldTextAreaBuilder extends GeneratorForAnnotatedField<FieldTextArea> {
     final properties = getClassProperties(FieldText);
     final map = annotationToJson(element, properties);
     buffer.write('''
-      Widget ${element.name}FormField(BuildContext context,Map<String, dynamic> _formData,  {Function? onSaved}) {
-          return ${textField(element.name, map)};
+      Widget ${element.name}FormField(BuildContext context,Map<String, dynamic> _formData,  {required Function onSaved}) {
+          return ${textField(element.name,'String', map)};
       }
     ''');
     return buffer.toString();
