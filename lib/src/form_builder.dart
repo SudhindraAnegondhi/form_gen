@@ -121,6 +121,9 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
                     child: Form(
                       key: _formKey,
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           $formFieldList,
                           if(widget.appBar == null)

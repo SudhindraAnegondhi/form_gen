@@ -68,7 +68,6 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     } else if (type == 'List<Map<String, dynamic>>' || type == 'List<Map<String, String>>') {
       final List<Map<String, dynamic>?> list = [];
       final items = annotation?.getField(property)?.toListValue();
-      print('ITEMS:' + items.toString());
       for (final item in items ?? []) {
         final map = <String, dynamic>{};
         final mapObj = item?.toMapValue();
@@ -111,7 +110,6 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   static Map<String, String> getClassNameProperties(String className) {
     final Map<String, String> properties = <String, String>{};
     final DeclarationMirror? cm = currentMirrorSystem().isolate.rootLibrary.declarations[Symbol(className)];
-    print(currentMirrorSystem().isolate.rootLibrary.declarations.toString());
     if (cm is ClassMirror) {
       for (final DeclarationMirror dm in cm.declarations.values) {
         if (dm is VariableMirror) {
@@ -174,21 +172,43 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   // ignore: avoid_annotating_with_dynamic
   String textField(String elementName, String elementType, Map<String, dynamic> map, {String? parent}) {
     final initialValue = map['initialValue'] ?? '';
+    final autovalidateMode = map['autovalidateMode'] ?? 'AutovalidateMode.onUserInteraction';
     return '''
   
    TextFormField(
-        initialValue: ${parent == null ? "_formData['$elementName'] ?? '$initialValue'" : "_formData['$parent']['$elementName'] ?? '$initialValue'"},
+        initialValue: ${parent == null ? "_formData['$elementName'] ?? '$initialValue'" : "_formData['$parent']?['$elementName'] ?? '$initialValue'"},
+        autovalidateMode: $autovalidateMode,
+        autoFocus: ${map['autoFocus'] ?? true},
+        obscureText: ${map['obscureText'] ?? false},
         decoration: const InputDecoration(
-          labelText: '${map['label'] ?? elementName[0].toUpperCase() + elementName.substring(1)}',
+          labelText: '${map['labelText'] ?? elementName[0].toUpperCase() + elementName.substring(1)}',
           labelStyle: ${map['labelStyle'] ?? 'TextStyle(fontSize: 16.0, color: Colors.black)'},
-          hintText: '${map['hint'] ?? ''}',
-          helperText: '${map['helper'] ?? ''}',
+          floatingLabelBehavior: ${map['floatingLabelBehavior'] ?? 'FloatingLabelBehavior.auto'},
+          hintText: '${map['hintText'] ?? ''}',
+          helperText: '${map['helperText'] ?? ''}',
           errorText: '${map['error'] ?? ''}',
           fillColor: ${map['fillColor'] ?? 'Colors.white'},
+          hoverColor: ${map['hoverColor'] ?? 'Color.fromARGB(255, 161, 179, 239)'},
           filled:${map['filled'] ?? 'true'},
           errorMaxLines: ${map['errorMaxLines'] ?? '1'},
           errorStyle: ${map['errorStyle'] ?? 'TextStyle( color: Colors.red, fontSize: 12.0 )'},
-          border: ${map['border'] ?? 'InputBorder.none'},
+          border: ${map['border'] ?? 'OutlineInputBorder()'},
+          enabledBorder: ${map['enabledBorder'] ?? 'OutlineInputBorder(borderSide: BorderSide(color: Colors.white, width: 1.0))'},
+          focusedBorder: ${map['focusedBorder'] ?? 'OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 1.0))'},
+          disabledBorder: ${map['disabledBorder'] ?? 'OutlineInputBorder(borderSide: BorderSide(color: Colors.grey))'},
+          enabled: ${map['enabled'] ?? 'true'},
+          prefixIcon: ${map['prefixIcon'] ?? 'null'},
+          prefixText: ${map['prefixText'] ?? 'null'},
+          suffixIcon: ${map['suffixIcon'] ?? 'null'},
+          suffixText: ${map['suffixText'] ?? 'null'},
+          prefix: ${map['prefix'] ?? 'null'},
+          suffix: ${map['suffix'] ?? 'null'},
+          counterText: ${map['counterText'] ?? 'null'},
+          counterStyle: ${map['counterStyle'] ?? 'null'},
+          contentPadding: ${map['contentPadding'] ?? 'EdgeInsets.all(0.0)'},
+          isDense: ${map['isDense'] ?? 'false'},
+          alignLabelWithHint: ${map['alignLabelWithHint'] ?? 'false'},
+
         ),
         onSaved: (value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
         onChanged:(value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),

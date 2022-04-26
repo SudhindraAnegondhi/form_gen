@@ -11,7 +11,11 @@ import '../generator_for_annotated_field.dart';
 
 class FieldClassBuilder extends GeneratorForAnnotatedField<FieldClass> {
   @override
-  String generateForAnnotatedField(FieldElement element, ConstantReader annotation, BuildStep buildstep,) {
+  String generateForAnnotatedField(
+    FieldElement element,
+    ConstantReader annotation,
+    BuildStep buildstep,
+  ) {
     final buffer = StringBuffer();
     final properties = getClassProperties(FieldClass);
     print('PROPERTIES: ${properties.toString()}');
@@ -20,6 +24,7 @@ class FieldClassBuilder extends GeneratorForAnnotatedField<FieldClass> {
     // some prior preps
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context,  Map<String, dynamic> _formData, {required Function onSaved}) {
+        _formData['${element.name}'] ??= ${element.name[0].toUpperCase() + element.name.substring(1)}().toJson();
         return Column(
           children: <Widget>[
     ''');
@@ -50,12 +55,12 @@ class FieldClassBuilder extends GeneratorForAnnotatedField<FieldClass> {
                 ']';
             initialValue = (map['options'] as List<Map<String, dynamic>>).map((e) => "'e['value'].toString()'").toList().first;
           }
-          buffer.write('${dropdownField(map['name'] as String,  items, initialValue, map)},\n');
+          buffer.write('${dropdownField(map['name'] as String, items, initialValue, map)},\n');
           break;
         case 'FieldText':
         case 'FieldTextArea':
         default:
-          buffer.writeln("${textField('${map['name'] as String}', '${(map['type'] ?? 'String') as String}',  map, parent: element.name)},\n");
+          buffer.writeln("${textField('${map['name'] as String}', '${(map['type'] ?? 'String') as String}', map, parent: element.name)},\n");
           break;
       }
     }
