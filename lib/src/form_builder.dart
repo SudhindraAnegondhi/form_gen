@@ -30,11 +30,11 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
             .toList()
             .join(',\n') +
         '}';
-    final String formFieldList =
-        visitor.fields.keys.map((key) => '${key}FormField(context, _formData, onSaved:onSaved)').toList().join(',\n');
+    final formFieldList = visitor.fields.keys.map((key) => '${key}FormField(context, _formData, onSaved:onSaved)').toList().join(',\n');
 
     buffer.writeln('class $className extends StatefulWidget {');
     buffer.write('''
+      // ignore_for_file: unused_element, unnecessary_this
         const $className({Key? key, this.model, this.onSubmit,   this.showAppBar = true, this.appBar,
       this.size, this.textStyle, this.color, this.textColor, this.headlineStyle, 
       this.backgroundColor, this.backgroundImage, this.backgroundImageFit,}) : super(key: key);
@@ -61,7 +61,6 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
       class _${className}State extends State<$className> {
         final _formKey = GlobalKey<FormState>();
         final _formData = <String, dynamic>{};
-
         @override
         void initState() {
           super.initState();
@@ -117,16 +116,26 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
                   shadowColor: Colors.black,
                   child:  Padding(
                     padding: const EdgeInsets.all(8.0),
-                  child: SingleChildScrollView(
-                    child: Form(
+                  child:  Form(
                       key: _formKey,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          $formFieldList,
-                          if(widget.appBar == null)
+                          Expanded(
+                            flex: 9,
+                            child: SingleChildScrollView(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  $formFieldList
+                                ],
+                              ), // Column
+                            ), // SingleChildScrollView
+                         ), // Expanded
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
@@ -154,31 +163,34 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
                         ], //Children
                       ), // Column
                     ), //Form
-                  ), // SingleChildSrcollView
                   ), // Padding
                 ), // Card
               ), // Container
             ), // Center
           );
         }
-
-        void _onChanged(String key, dynamic value) {
-          setState(() {
-            _formData[key] = value;
-          });
-        }
-
-        void _onSaved(String key, dynamic value) {
-          setState(() {
-            _formData[key] = value;
-          });
-        } 
-
-      
       }
+    extension on String {
+        bool get isEmail => RegExp(r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+').hasMatch(this);
+        bool get isPhone => RegExp(r'^[0-9]{10}').hasMatch(this);
+        bool get isNumeric => RegExp(r'^[0-9.]*\$').hasMatch(this);
+        bool get isName => RegExp(r'^[a-zA-Z.]*\$').hasMatch(this);
+        bool get isDate => RegExp(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}\$').hasMatch(this);
+        bool get isDateTime => RegExp(r'^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\$').hasMatch(this);
+        bool get isTime => RegExp(r'^[0-9]{2}:[0-9]{2}:[0-9]{2}\$').hasMatch(this);
+        bool get isDateTimeRange => RegExp(r'^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}-[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\$').hasMatch(this);
+        bool get isDateRange => RegExp(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{4}-[0-9]{2}-[0-9]{2}\$').hasMatch(this);
+        // ignore: unnecessary_this, prefer_single_quotes
+        String get capitalize => "\${this[0].toUpperCase()}\${this.substring(1)}";
+        // ignore: unnecessary_this
+        String get capitalizeWords => this.split(' ').map((word) => word.capitalize).join(' ');
+    }
+      
   ''');
     return buffer.toString();
   }
+
+ 
 /*
   void initModel(ModelVisitor visitor, StringBuffer classBuffer, String model, Map<String, dynamic> defs) {
     classBuffer.write('''

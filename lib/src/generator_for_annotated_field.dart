@@ -4,7 +4,8 @@ import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
-import 'validators.dart' show validatorsMap;
+
+import '_validators.dart';
 
 const _dartTypes = ['int', 'double', 'DateTime', 'String', 'bool', 'List', 'Map'];
 
@@ -66,20 +67,27 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
       }
       return map;
     } else if (type == 'List<Map<String, dynamic>>' || type == 'List<Map<String, String>>') {
-      final List<Map<String, dynamic>?> list = [];
+      final List<Map<String, dynamic>> _list = [];
       final items = annotation?.getField(property)?.toListValue();
       for (final item in items ?? []) {
-        final map = <String, dynamic>{};
         final mapObj = item?.toMapValue();
         final mapObjKeys = mapObj?.keys.toList();
+        final map = <String, dynamic>{};
         for (final DartObject? objKey in mapObjKeys ?? []) {
           final String strKey = objKey?.toStringValue() ?? '  ';
-          map[strKey] = mapObj?[objKey]
-              ?.toStringValue(); // _annotationToValue(strKey, (properties[strKey] ?? 'String') as String, mapObj[objKey] as DartObject, properties);
+          final value = mapObj?[objKey]?.toStringValue();
+          map[strKey] =
+              value?.toString() ?? ''; // _annotationToValue(strKey, (properties[strKey] ?? 'String') as String, mapObj[objKey] as DartObject, properties);
+          map['type'] = 'String'; // for now. TODO: make this more dynamic
+          if (property == 'validators') {
+            print('MAP ' + map.toString());
+            print('*** $strKey = ${map[strKey]}');
+          }
         }
-        list.add(map);
+        _list.add(map);
       }
-      return list;
+      print('============> ${_list.toString()}');
+      return _list;
     } else if (type == 'unknown' || type == 'dynamic') {
       return annotation?.getField(property)?.toStringValue();
     } else {
@@ -137,30 +145,76 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     final json = <String, dynamic>{};
     final DartObject? annotation = getAnnotation(element);
     for (final property in properties.entries) {
+      
       json[property.key] = _annotationToValue(property.key, property.value as String, annotation, properties);
+      if(property.key == 'validators') {
+        print('JSON ' + json.toString());
+      }
     }
     return json;
   }
 
-  String composeValidators(List<Map<String, dynamic>?> validators) {
-    final _validators = validators.map((e) {
-      final func = e!['type'] == null ? e['validator'] : validatorsMap[e['type'] as String];
-      if (func == null) {
-        throw Exception('Unknown validator type: ${e['type']}');
+  /// Validators can be specified in two ways.
+  /// 1. Using any of the documented validator types.
+  ///    This is done by specifying the validator type in the annotation, followed by an
+  ///    optional list of parameters.
+  /// 2. Using a custom validator function. The function must be specified as
+  ///    {"function": "myCustomValidatorFunction"}
+  ///    The function must accept a single parameter, which is the value to validate.\
+  ///    the function must return a null if the value is valid, or a string describing the error.
+  ///
+  // ignore: avoid_annotating_with_dynamic
+  String composeValidators(dynamic validators) {
+    if(validators is! List) {
+      print('Validators must be a list, but got ${validators.runtimeType}');
+      return '';
+    }
+    final _validators = validators?.map((e) {
+      String? func;
+
+      if ((e?['type'] ?? 'custom') == 'custom') {
+        func = e?['function'] as String?;
+      } else {
+        print('Keys: ${validatorsMap.keys}  key: ${e?['type']}');
+        for (final key in validatorsMap.keys) {
+          if (key == 'required') {
+            func = validatorsMap[key];
+            print('*** required : $func');
+            break;
+          } else if (key == e?['type'] as String) {
+            func = key;
+          }
+        }
+        if (func == null) {
+          throw Exception('Unknown validator type: ${e?['type']}');
+        }
       }
-      return '''
-          result = $func(value);
-          String  message = '${e['message'] ?? ''}';
+
+      if (['min', 'max', 'minLength', 'maxLength', 'range'].contains(e?['type'])) {
+        return '''result = ${func}(${e?['length']});
+         if (result != null) {
+           const  message = '${e?['message']}';
+            errors.add(message.isEmpty ? result : '${e?['message'] ?? ''}');
+          }
+        ''';
+      } else {
+        return '''
+          result = $func;
           if (result != null) {
-            errors.add(message.isEmpty ? result : message);
+            const message = '${e?['message']}';
+            errors.add(message.isEmpty ? result : '${e?['message'] ?? ''}');
           }
       ''';
+      }
     }).toList();
-
+    if (_validators?.isEmpty ?? true) {
+      return '';
+    }
     return ''' 
-    {
+    validator: (value) {
       List<String> errors =[];
-      ${_validators.join('\n')}
+      String? result;
+      ${_validators!.join('\n')}
       return errors.isEmpty ? null : errors.join('\\n');
     }
     ''';
@@ -174,12 +228,15 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     final initialValue = map['initialValue'] ?? '';
     final autovalidateMode = map['autovalidateMode'] ?? 'AutovalidateMode.onUserInteraction';
     return '''
-  
+   SizedBox(
+     height: 60,
+     child:
    TextFormField(
         initialValue: ${parent == null ? "_formData['$elementName'] ?? '$initialValue'" : "_formData['$parent']?['$elementName'] ?? '$initialValue'"},
         autovalidateMode: $autovalidateMode,
-        autoFocus: ${map['autoFocus'] ?? true},
+        autofocus: ${map['autoFocus'] ?? true},
         obscureText: ${map['obscureText'] ?? false},
+        scrollPadding: const EdgeInsets.all(5.0),
         decoration: const InputDecoration(
           labelText: '${map['labelText'] ?? elementName[0].toUpperCase() + elementName.substring(1)}',
           labelStyle: ${map['labelStyle'] ?? 'TextStyle(fontSize: 16.0, color: Colors.black)'},
@@ -192,7 +249,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
           filled:${map['filled'] ?? 'true'},
           errorMaxLines: ${map['errorMaxLines'] ?? '1'},
           errorStyle: ${map['errorStyle'] ?? 'TextStyle( color: Colors.red, fontSize: 12.0 )'},
-          border: ${map['border'] ?? 'OutlineInputBorder()'},
+          border: ${map['border'] ?? 'InputBorder.none'},
           enabledBorder: ${map['enabledBorder'] ?? 'OutlineInputBorder(borderSide: BorderSide(color: Colors.white, width: 1.0))'},
           focusedBorder: ${map['focusedBorder'] ?? 'OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 1.0))'},
           disabledBorder: ${map['disabledBorder'] ?? 'OutlineInputBorder(borderSide: BorderSide(color: Colors.grey))'},
@@ -205,7 +262,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
           suffix: ${map['suffix'] ?? 'null'},
           counterText: ${map['counterText'] ?? 'null'},
           counterStyle: ${map['counterStyle'] ?? 'null'},
-          contentPadding: ${map['contentPadding'] ?? 'EdgeInsets.all(0.0)'},
+          contentPadding: ${map['contentPadding'] ?? 'EdgeInsets.all(5.0)'},
           isDense: ${map['isDense'] ?? 'false'},
           alignLabelWithHint: ${map['alignLabelWithHint'] ?? 'false'},
 
@@ -215,7 +272,9 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         maxLines: ${map['maxLines'] ?? 1},
         keyboardType: TextInputType.${map['keyboardType'] ?? 'text'},
         inputFormatters: ${map['inputFormatters'] ?? 'null'},
-      ) // TextFormField
+        ${composeValidators(map['validators'] ?? [])}
+      ), // TextFormField
+    ) // SizedBox
     ''';
   }
 
