@@ -45,7 +45,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
 
     return values.join('\n\n');
   }
-
+  /*
   dynamic _annotationToValue(String property, String type, DartObject? annotation, Map<String, dynamic> properties) {
     if (type == 'String') {
       return annotation?.getField(property)?.toStringValue();
@@ -66,7 +66,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         map[strKey] = mapObj?[objKey]?.toStringValue();
       }
       return map;
-    } else if (type == 'List<Map<String, dynamic>>' || type == 'List<Map<String, String>>') {
+    } else if (type == 'List<Map<String, dynamic>>' || type == 'List<Map<String, String>>' || type == 'List<Map<String, Object>>') {
       final List<Map<String, dynamic>> _list = [];
       final items = annotation?.getField(property)?.toListValue();
       for (final item in items ?? []) {
@@ -94,6 +94,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
       throw Exception('Unknown type: $type');
     }
   }
+  */
 
   static bool classExists(String className) {
     try {
@@ -141,16 +142,69 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     return properties;
   }
 
+  dynamic __decodeDartObject(DartObject? dartObject) {
+    if (dartObject == null || dartObject.type == null) {
+      return null;
+    }
+    if (dartObject.type?.toString() == 'String') {
+      return dartObject.toStringValue();
+    } else if (dartObject.type!.toString() == 'int') {
+      return dartObject.toIntValue();
+    } else if (dartObject.type!.toString() == 'double') {
+      return dartObject.toDoubleValue();
+    } else if (dartObject.type!.toString() == 'bool') {
+      return dartObject.toBoolValue();
+    } else if (dartObject.type!.toString().startsWith('List')) {
+      final List<dynamic> list = [];
+      for (final DartObject item in dartObject.toListValue() ?? []) {
+        list.add(__decodeDartObject(item));
+      }
+      return list;
+    } else if (dartObject.type!.toString().startsWith('Map')) {
+      final Map<String, dynamic> map = {};
+      for (final key in dartObject.toMapValue()!.keys.toList()) {
+        map[key?.toStringValue() ?? ' '] = __decodeDartObject(dartObject.toMapValue()?[key]);
+      }
+      return map;
+    } else {
+      return null;
+    }
+  }
+
   Map<String, dynamic> annotationToJson(Element element, Map<String, dynamic> properties) {
     final json = <String, dynamic>{};
     final DartObject? annotation = getAnnotation(element);
-    for (final property in properties.entries) {
-      
-      json[property.key] = _annotationToValue(property.key, property.value as String, annotation, properties);
-      if(property.key == 'validators') {
-        print('JSON ' + json.toString());
+    print('**** ${element.name} = ${annotation?.toString()}');
+    if (annotation != null) {
+      for (final String property in properties.keys) {
+        final String type = properties[property] as String;
+        final DartObject? value = annotation.getField(property);
+        json['$property'] = __decodeDartObject(value);
+        print('json property: $property = ${json[property]}');
       }
     }
+    /*
+    final items = annotation?.getField('properties')?.toListValue();
+    print('*** items = ${items?.toString()}');
+    final itemList = [];
+    if (items != null) {
+      for (final item in items) {
+        final itemMap = item.toMapValue();
+        final itemMapKeys = itemMap?.keys.toList();
+        final itemMap2 = <String, dynamic>{};
+        for (final DartObject? objKey in itemMapKeys ?? []) {
+          final value = itemMap?[objKey];
+          final String strKey = objKey?.toStringValue() ?? '  ';
+          itemMap2[strKey] = __decodeDartObject(value);
+          print('itemMap2 = ${itemMap2.toString()}');
+        }
+        itemList.add(itemMap2);
+      }
+    }
+    print('itemList = ${itemList.toString()}');
+    json['properties'] = itemList;
+    */
+    print('JSON = ${json.toString()}');
     return json;
   }
 
@@ -165,11 +219,11 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   ///
   // ignore: avoid_annotating_with_dynamic
   String composeValidators(dynamic validators) {
-    if(validators is! List) {
+    if (validators is! List) {
       print('Validators must be a list, but got ${validators.runtimeType}');
       return '';
     }
-    final _validators = validators?.map((e) {
+    final _validators = validators.map((e) {
       String? func;
 
       if ((e?['type'] ?? 'custom') == 'custom') {
@@ -207,14 +261,14 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
       ''';
       }
     }).toList();
-    if (_validators?.isEmpty ?? true) {
+    if (_validators.isEmpty) {
       return '';
     }
     return ''' 
     validator: (value) {
       List<String> errors =[];
       String? result;
-      ${_validators!.join('\n')}
+      ${_validators.join('\n')}
       return errors.isEmpty ? null : errors.join('\\n');
     }
     ''';
