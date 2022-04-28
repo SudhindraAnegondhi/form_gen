@@ -15,9 +15,6 @@ class FieldTextBuilder extends GeneratorForAnnotatedField<FieldText> {
     final buffer = StringBuffer();
     final properties = getClassProperties(FieldText);
     final map = annotationToJson(element, properties);
-    print(properties.toString());
-    print(map.toString());
-    //final className = element.name[0].toUpperCase() + element.name.substring(1);
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved}) {
         return ${textField(element.name, element.type.toString(), map)};

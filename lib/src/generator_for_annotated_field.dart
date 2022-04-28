@@ -45,73 +45,19 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
 
     return values.join('\n\n');
   }
-  /*
-  dynamic _annotationToValue(String property, String type, DartObject? annotation, Map<String, dynamic> properties) {
-    if (type == 'String') {
-      return annotation?.getField(property)?.toStringValue();
-    } else if (type == 'bool') {
-      return annotation?.getField(property)?.toBoolValue();
-    } else if (type == 'int') {
-      return annotation?.getField(property)?.toIntValue();
-    } else if (type == 'double') {
-      return annotation?.getField(property)?.toDoubleValue();
-    } else if (type == 'List<String>') {
-      return annotation?.getField(property)?.toListValue()?.map((e) => e.toStringValue()).toList();
-    } else if (type == 'Map<String, dynamic>') {
-      final mapObj = annotation?.getField(property)?.toMapValue();
-      final mapObjKeys = mapObj?.keys.toList();
-      final map = <String, dynamic>{};
-      for (final DartObject? objKey in mapObjKeys ?? []) {
-        final String strKey = objKey?.toStringValue() ?? '  ';
-        map[strKey] = mapObj?[objKey]?.toStringValue();
-      }
-      return map;
-    } else if (type == 'List<Map<String, dynamic>>' || type == 'List<Map<String, String>>' || type == 'List<Map<String, Object>>') {
-      final List<Map<String, dynamic>> _list = [];
-      final items = annotation?.getField(property)?.toListValue();
-      for (final item in items ?? []) {
-        final mapObj = item?.toMapValue();
-        final mapObjKeys = mapObj?.keys.toList();
-        final map = <String, dynamic>{};
-        for (final DartObject? objKey in mapObjKeys ?? []) {
-          final String strKey = objKey?.toStringValue() ?? '  ';
-          final value = mapObj?[objKey]?.toStringValue();
-          map[strKey] =
-              value?.toString() ?? ''; // _annotationToValue(strKey, (properties[strKey] ?? 'String') as String, mapObj[objKey] as DartObject, properties);
-          map['type'] = 'String'; // for now. TODO: make this more dynamic
-          if (property == 'validators') {
-            print('MAP ' + map.toString());
-            print('*** $strKey = ${map[strKey]}');
-          }
-        }
-        _list.add(map);
-      }
-      print('============> ${_list.toString()}');
-      return _list;
-    } else if (type == 'unknown' || type == 'dynamic') {
-      return annotation?.getField(property)?.toStringValue();
-    } else {
-      throw Exception('Unknown type: $type');
-    }
-  }
-  */
 
   static bool classExists(String className) {
     try {
       if (_dartTypes.contains(className)) {
-        print('$className is a dart type');
         return false;
       }
       final DeclarationMirror? cm = currentMirrorSystem().isolate.rootLibrary.declarations[Symbol(className)];
       if (cm != null) {
-        print('$className is a class');
         return true;
       } else {
-        print('$className is not a class');
         return false;
       }
     } catch (e) {
-      print(e);
       return false;
     }
   }
@@ -130,6 +76,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     }
     return properties;
   }
+  
 
   Map<String, String> getClassProperties(Type type) {
     final Map<String, String> properties = {};
@@ -174,37 +121,12 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   Map<String, dynamic> annotationToJson(Element element, Map<String, dynamic> properties) {
     final json = <String, dynamic>{};
     final DartObject? annotation = getAnnotation(element);
-    print('**** ${element.name} = ${annotation?.toString()}');
     if (annotation != null) {
       for (final String property in properties.keys) {
-        final String type = properties[property] as String;
-        final DartObject? value = annotation.getField(property);
-        json['$property'] = __decodeDartObject(value);
-        print('json property: $property = ${json[property]}');
+       // final DartObject? value = annotation.getField(property);
+        json['$property'] = __decodeDartObject(annotation.getField(property));
       }
     }
-    /*
-    final items = annotation?.getField('properties')?.toListValue();
-    print('*** items = ${items?.toString()}');
-    final itemList = [];
-    if (items != null) {
-      for (final item in items) {
-        final itemMap = item.toMapValue();
-        final itemMapKeys = itemMap?.keys.toList();
-        final itemMap2 = <String, dynamic>{};
-        for (final DartObject? objKey in itemMapKeys ?? []) {
-          final value = itemMap?[objKey];
-          final String strKey = objKey?.toStringValue() ?? '  ';
-          itemMap2[strKey] = __decodeDartObject(value);
-          print('itemMap2 = ${itemMap2.toString()}');
-        }
-        itemList.add(itemMap2);
-      }
-    }
-    print('itemList = ${itemList.toString()}');
-    json['properties'] = itemList;
-    */
-    print('JSON = ${json.toString()}');
     return json;
   }
 
@@ -220,8 +142,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   // ignore: avoid_annotating_with_dynamic
   String composeValidators(dynamic validators) {
     if (validators is! List) {
-      print('Validators must be a list, but got ${validators.runtimeType}');
-      return '';
+      throw Exception('Validators must be a list, but got ${validators.runtimeType} : $validators');
     }
     final _validators = validators.map((e) {
       String? func;
@@ -229,11 +150,9 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
       if ((e?['type'] ?? 'custom') == 'custom') {
         func = e?['function'] as String?;
       } else {
-        print('Keys: ${validatorsMap.keys}  key: ${e?['type']}');
         for (final key in validatorsMap.keys) {
           if (key == 'required') {
             func = validatorsMap[key];
-            print('*** required : $func');
             break;
           } else if (key == e?['type'] as String) {
             func = key;
@@ -274,10 +193,6 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     ''';
   }
 
-  // text properties
-  // inputDecorators - fillColor, filled, errorMaxLines, errorStyle
-  // textInputAction
-  // ignore: avoid_annotating_with_dynamic
   String textField(String elementName, String elementType, Map<String, dynamic> map, {String? parent}) {
     final initialValue = map['initialValue'] ?? '';
     final autovalidateMode = map['autovalidateMode'] ?? 'AutovalidateMode.onUserInteraction';
