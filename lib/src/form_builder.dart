@@ -4,16 +4,20 @@ import 'package:build/src/builder/build_step.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:flutter_form_annotations/flutter_form_annotations.dart';
-import 'generator_for_annotated_field.dart';
 import 'model_visitor.dart';
 
 import 'helpers.dart';
+
 class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
   @override
   String generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep) {
     final buffer = StringBuffer();
     final properties = Helpers.getClassProperties(FormBuilder);
     final classMap = Helpers.annotationToJson<FormBuilder>(element, properties);
+
+    final bool needScaffold = (classMap['needScaffold'] ?? true) as bool;
+    print('Need scaffold $needScaffold');
+    final bool allowNullOrEmpty = (classMap['allowNullOrEmpty'] ?? true) as bool;
     final ModelVisitor visitor = ModelVisitor();
     element.visitChildren(visitor);
     final className = '${visitor.className}Form'; // EX: 'ModelForm' for 'Model'.
@@ -37,13 +41,15 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
     buffer.writeln('class $className extends StatefulWidget {');
     buffer.write('''
       // ignore_for_file: unused_element, unnecessary_this
-        const $className({Key? key, this.model, this.onSubmit,   this.showAppBar = true, this.appBar,
+        const $className({Key? key, this.model, this.onSubmit, this.allowNullOrEmpty = false, this.needScaffold= true,   this.showAppBar = true, this.appBar,
       this.size, this.textStyle, this.color, this.textColor, this.headlineStyle, 
       this.backgroundColor, this.backgroundImage, this.backgroundImageFit,}) : super(key: key);
         final ${visitor.className}? model;
         final Function? onSubmit;
         final AppBar? appBar;
         final bool showAppBar;
+        final bool allowNullOrEmpty;
+        final bool needScaffold;
         final Size? size;
         final TextStyle? textStyle;
         final Color? color;
@@ -63,6 +69,7 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
       class _${className}State extends State<$className> {
         final _formKey = GlobalKey<FormState>();
         final _formData = <String, dynamic>{};
+        final bool _allowNullOrEmpty = $allowNullOrEmpty;
         @override
         void initState() {
           super.initState();
@@ -81,16 +88,51 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
           });
         }
 
-        void onSubmit() {
+        Future<void> alert(String title, List<String> messages, {String? okButtonText}) async {
+          await showDialog<void>(
+            context: context,
+            barrierDismissible: false, // user must tap button!
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title:  Text(title, style: const TextStyle(fontSize: 20)),
+                content: SingleChildScrollView(
+                  child: ListBody(
+                    children: messages.map((String message) {
+                      return Text(message);
+                    }).toList(),
+                  ),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child:  Text(okButtonText ?? 'OK'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        }
+
+        void onSubmit()  async {
           if (_formKey.currentState?.validate() ?? false) {
             _formKey.currentState?.save();
+            if(!_allowNullOrEmpty && _formData.keys.toList().any((e) => _formData[e] == null || _formData[e].toString().isEmpty))  {
+               await alert('Error', ['Please fill in all the required fields.']);
+               return;
+            }
            Navigator.of(context).pop(${visitor.className}.fromJson(_formData));
           }
         }
 
         @override
         Widget build(BuildContext context) {
-          return Scaffold(
+          return 
+          ''');
+    if (needScaffold) {
+      buffer.write('''
+          Scaffold(
             appBar: widget.showAppBar ? widget.appBar ??
             AppBar(
               automaticallyImplyLeading: false,
@@ -105,51 +147,55 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
                       Text('Cancel', style: Theme.of(context).textTheme.button?.copyWith(color: widget.textColor ?? Theme.of(context).colorScheme.onPrimary)),
                 ),
             ) : null,
-          body: Center(
-              child: Container(
+          body: 
+          ''');
+    }
+    buffer.write('''
+           Center( // 0. Center
+              child: Container(  // 1. Container
                 width: widget.size?.width ?? MediaQuery.of(context).size.width,
                 height: widget.size?.height ?? min(MediaQuery.of(context).size.height - (widget.showAppBar ? AppBar().preferredSize.height: 0), _formData.keys.toList().length  * 85),
                 color: widget.backgroundColor ?? Colors.white,
-                child: Card(
+                child: Card(  // 2. Card
                   elevation: 15,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   shadowColor: Colors.black,
-                  child:  Padding(
+                  child:  Padding(  // 3. Padding
                     padding: const EdgeInsets.all(8.0),
-                  child:  Form(
+                  child:  Form( // 4. Form
                       key: _formKey,
-                      child: Column(
+                      child: Column( // 5. Column
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Expanded(
+                          Expanded( // 6. Expanded
                             flex: 9,
-                            child: SingleChildScrollView(
-                              child: Column(
+                            child: SingleChildScrollView( // 7. SingleChildScrollView
+                              child: Column(  // 8. Column
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   $formFieldList
                                 ],
-                              ), // Column
-                            ), // SingleChildScrollView
-                         ), // Expanded
-                          Padding(
+                              ), // 8. Column
+                            ), // 7. SingleChildScrollView
+                         ), // 6. Expanded
+                          Padding( // 9. Padding
                             padding: const EdgeInsets.all(8.0),
-                            child: Row(
+                            child: Row( // 10. Row
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                ElevatedButton(
+                                ElevatedButton( // 11. ElevatedButton
                                   child: const Text('Cancel'),
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },
-                                ), // ElevatedButton
-                                ElevatedButton(
+                                ), // 11. ElevatedButton
+                                ElevatedButton( // 12. ElevatedButton
                                   child: const Text('Save'),
                                   onPressed: _formKey.currentState?.validate() ?? false  ?
                                   () {
@@ -158,20 +204,21 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
                                       Navigator.of(context).pop(${visitor.className}.fromJson(_formData));
                                       }  
                                   } : null,
-                                ), // ElevatedButton
+                                ), //  12. ElevatedButton
                               ], // Children
-                            ), //Row
-                          ), // Padding
+                            ), // 10. Row
+                          ), // 9. Padding
                         ], //Children
-                      ), // Column
-                    ), //Form
-                  ), // Padding
-                ), // Card
-              ), // Container
-            ), // Center
-          );
-        }
-      }
+                      ), // 5. Column
+                    ), // 4. Form
+                  ), // 3. Padding
+                ), //  2. Card
+              ),  // 1. Container
+              ), // 0. Center
+          ); // Scaffold
+        } // build
+      } // _${className}State
+
     extension on String {
         bool get isEmail => RegExp(r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+').hasMatch(this);
         bool get isPhone => RegExp(r'^[0-9]{10}').hasMatch(this);
@@ -182,9 +229,7 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
         bool get isTime => RegExp(r'^[0-9]{2}:[0-9]{2}:[0-9]{2}\$').hasMatch(this);
         bool get isDateTimeRange => RegExp(r'^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}-[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\$').hasMatch(this);
         bool get isDateRange => RegExp(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{4}-[0-9]{2}-[0-9]{2}\$').hasMatch(this);
-        // ignore: unnecessary_this, prefer_single_quotes
-        String get capitalize => "\${this[0].toUpperCase()}\${this.substring(1)}";
-        // ignore: unnecessary_this
+        String get capitalize => '\${this[0].toUpperCase()}\${this.substring(1)}';
         String get capitalizeWords => this.split(' ').map((word) => word.capitalize).join(' ');
     }
       

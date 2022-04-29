@@ -8,6 +8,7 @@ import 'package:source_gen/src/type_checker.dart';
 import 'validators.dart';
 
 const _dartTypes = ['int', 'double', 'DateTime', 'String', 'bool', 'List', 'Map'];
+
 class Helpers {
   static bool classExists(String className) {
     try {
@@ -80,7 +81,7 @@ class Helpers {
     }
   }
 
-   static DartObject? getAnnotation<AnnotationType>(Element element) {
+  static DartObject? getAnnotation<AnnotationType>(Element element) {
     final annotations = TypeChecker.fromRuntime(AnnotationType).annotationsOf(element);
     if (annotations.isEmpty) {
       return null;
@@ -103,6 +104,7 @@ class Helpers {
     }
     return json;
   }
+
 
   /// Validators can be specified in two ways.
   /// 1. Using any of the documented validator types.
@@ -138,7 +140,7 @@ class Helpers {
       }
 
       if (['min', 'max', 'minLength', 'maxLength', 'range'].contains(e?['type'])) {
-        return '''result = ${func}(${e?['length']});
+        return '''result = ${func}(${e?['length']})
          if (result != null) {
            const  message = '${e?['message']}';
             errors.add(message.isEmpty ? result : '${e?['message'] ?? ''}');
@@ -146,7 +148,7 @@ class Helpers {
         ''';
       } else {
         return '''
-          result = $func;
+          result = $func
           if (result != null) {
             const message = '${e?['message']}';
             errors.add(message.isEmpty ? result : '${e?['message'] ?? ''}');
@@ -166,5 +168,4 @@ class Helpers {
     }
     ''';
   }
-
 }
