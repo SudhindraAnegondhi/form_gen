@@ -9,14 +9,15 @@ import 'package:source_gen/source_gen.dart';
 import 'package:flutter_form_annotations/flutter_form_annotations.dart';
 import '../generator_for_annotated_field.dart';
 import '../model_visitor.dart';
+import '../helpers.dart';
 
 class FieldImagePickerBuilder extends GeneratorForAnnotatedField<FieldImagePicker> {
  
   @override
   String generateForAnnotatedField(FieldElement element, ConstantReader annotation, BuildStep buildstep) {
     final buffer = StringBuffer();
-    final properties = getClassProperties(FieldImagePicker);
-    final map = annotationToJson(element, properties);
+    final properties = Helpers.getClassProperties(FieldImagePicker);
+    final map = Helpers.annotationToJson<FieldImagePicker>(element, properties);
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context) {
         return ImagePickerFormField(

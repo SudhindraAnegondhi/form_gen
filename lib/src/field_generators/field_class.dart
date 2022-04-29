@@ -8,6 +8,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:flutter_form_annotations/flutter_form_annotations.dart';
 import '../generator_for_annotated_field.dart';
+import '../helpers.dart';
 
 class FieldClassBuilder extends GeneratorForAnnotatedField<FieldClass> {
   @override
@@ -17,8 +18,9 @@ class FieldClassBuilder extends GeneratorForAnnotatedField<FieldClass> {
     BuildStep buildstep,
   ) {
     final buffer = StringBuffer();
-    final properties = getClassProperties(FieldClass);
-    final classMap = annotationToJson(element, properties);
+    final properties = Helpers.getClassProperties(FieldClass);
+    final classMap = Helpers.annotationToJson<FieldClass>(element, properties);
+    
     // some prior preps
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context,  Map<String, dynamic> _formData, {required Function onSaved}) {

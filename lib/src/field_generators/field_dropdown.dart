@@ -8,14 +8,14 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:flutter_form_annotations/flutter_form_annotations.dart';
 import '../generator_for_annotated_field.dart';
-import '../model_visitor.dart';
+import '../helpers.dart'; 
 
 class FieldDropdownBuilder extends GeneratorForAnnotatedField<FieldDropdown> {
   @override
   String generateForAnnotatedField(FieldElement element, ConstantReader annotation, BuildStep buildstep) {
     final buffer = StringBuffer();
-    final properties = getClassProperties(FieldDropdown);
-    final map = annotationToJson(element, properties);
+    final properties = Helpers.getClassProperties(FieldDropdown);
+    final map = Helpers.annotationToJson<FieldDropdown>(element, properties);
     String items;
     String initialValue;
     if (map['type'] == 'enum') {

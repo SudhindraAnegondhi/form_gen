@@ -7,10 +7,13 @@ import 'package:flutter_form_annotations/flutter_form_annotations.dart';
 import 'generator_for_annotated_field.dart';
 import 'model_visitor.dart';
 
+import 'helpers.dart';
 class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
   @override
   String generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep) {
     final buffer = StringBuffer();
+    final properties = Helpers.getClassProperties(FormBuilder);
+    final classMap = Helpers.annotationToJson<FormBuilder>(element, properties);
     final ModelVisitor visitor = ModelVisitor();
     element.visitChildren(visitor);
     final className = '${visitor.className}Form'; // EX: 'ModelForm' for 'Model'.
@@ -20,8 +23,8 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
               final field = visitor.fields[key] as String;
               final type = visitor.fields[field]?.toString() ?? 'Unknown';
 
-              if (type == 'Unknown' && GeneratorForAnnotatedField.classExists(field)) {
-                final properties = GeneratorForAnnotatedField.getClassNameProperties(field);
+              if (type == 'Unknown' && Helpers.classExists(field)) {
+                final properties = Helpers.getClassNameProperties(field);
                 return '"$key": {\n' + properties.keys.map((e) => '"$e": null').join(',\n') + '}\n';
               }
               return "'$key': null";
