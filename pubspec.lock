@@ -37,7 +37,7 @@ packages:
     source: hosted
     version: "2.1.0"
   build:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: build
       url: "https://pub.dartlang.org"
@@ -177,7 +177,7 @@ packages:
     source: hosted
     version: "1.0.0"
   flutter_form_annotations:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       path: "../flutter_form_annotations"
       relative: true
@@ -345,7 +345,7 @@ packages:
     source: hosted
     version: "1.0.1"
   source_gen:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: source_gen
       url: "https://pub.dartlang.org"
