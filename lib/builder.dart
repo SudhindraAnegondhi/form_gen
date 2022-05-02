@@ -1,6 +1,5 @@
 // ignore_for_file: lines_longer_than_80_chars
 
-
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
 import 'src/form_builder.dart';
@@ -22,9 +21,7 @@ Builder fieldDropdownBuilder(BuilderOptions options) => SharedPartBuilder([Field
 
 Builder fieldFilterChipBuilder(BuilderOptions options) => SharedPartBuilder([FieldFilterChipBuilder()], 'field_filter_chip_builder');
 
-Builder fieldImagePickerBuilder(BuilderOptions options) => SharedPartBuilder([FieldImagePickerBuilder()], 'field_image_picker_builder');
-
-Builder fieldRadioGroupBuilder(BuilderOptions options) => SharedPartBuilder([FieldRadioGroupBuilder()], 'field_radio_group_builder');
+Builder fieldRadioBuilder(BuilderOptions options) => SharedPartBuilder([FieldRadioBuilder()], 'field_radio_group_builder');
 
 Builder fieldRangeSliderBuilder(BuilderOptions options) => SharedPartBuilder([FieldRangeSliderBuilder()], 'field_range_slider_builder');
 

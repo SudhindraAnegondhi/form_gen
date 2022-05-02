@@ -21,22 +21,9 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
     final ModelVisitor visitor = ModelVisitor();
     element.visitChildren(visitor);
     final className = '${visitor.className}Form'; // EX: 'ModelForm' for 'Model'.
-    final fields = '{' +
-        visitor.fields.keys
-            .map((key) {
-              final field = visitor.fields[key] as String;
-              final type = visitor.fields[field]?.toString() ?? 'Unknown';
-
-              if (type == 'Unknown' && Helpers.classExists(field)) {
-                final properties = Helpers.getClassNameProperties(field);
-                return '"$key": {\n' + properties.keys.map((e) => '"$e": null').join(',\n') + '}\n';
-              }
-              return "'$key': null";
-            })
-            .toList()
-            .join(',\n') +
-        '}';
-    final formFieldList = visitor.fields.keys.map((key) => '${key}FormField(context, _formData, onSaved:onSaved)').toList().join(',\n');
+    final fields = '{' + visitor.fields.keys.map((key) => "'$key': null").toList().join(',\n') + '}';
+    final formFieldList =
+        visitor.fields.keys.map((key) => 'SizedBox(width: 400, child: ${key}FormField(context, _formData, onSaved:onSaved,),)').toList().join(',\n');
 
     buffer.writeln('class $className extends StatefulWidget {');
     buffer.write('''
@@ -77,7 +64,9 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
         }
 
         double min(double a, double b) => a < b ? a : b;
+    ''');
 
+    buffer.write('''
         void onSaved(String key, dynamic value, {String? parent}) {
           setState(() {
             if (parent != null && parent.isNotEmpty) {
@@ -151,9 +140,14 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
           ''');
     }
     buffer.write('''
+        SizedBox(
+        height: widget.size?.height ??
+            min(MediaQuery.of(context).size.height - (widget.showAppBar ? AppBar().preferredSize.height : 0), _formData.keys.toList().length * 85),
+        width: widget.size?.width ?? MediaQuery.of(context).size.width,
+        child:
            Center( // 0. Center
               child: Container(  // 1. Container
-                width: widget.size?.width ?? MediaQuery.of(context).size.width,
+                width: min(widget.size?.width ?? MediaQuery.of(context).size.width, 600),
                 height: widget.size?.height ?? min(MediaQuery.of(context).size.height - (widget.showAppBar ? AppBar().preferredSize.height: 0), _formData.keys.toList().length  * 85),
                 color: widget.backgroundColor ?? Colors.white,
                 child: Card(  // 2. Card
@@ -215,6 +209,7 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
                 ), //  2. Card
               ),  // 1. Container
               ), // 0. Center
+            ), // SizedBox
           ); // Scaffold
         } // build
       } // _${className}State

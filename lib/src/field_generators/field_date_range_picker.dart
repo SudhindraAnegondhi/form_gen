@@ -8,17 +8,19 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:flutter_form_annotations/flutter_form_annotations.dart';
 import '../generator_for_annotated_field.dart';
-import '../model_visitor.dart';
+import '../helpers.dart';
 
 class FieldDateRangePickerBuilder extends GeneratorForAnnotatedField<FieldDateRangePicker> {
-  
   @override
   String generateForAnnotatedField(FieldElement element, ConstantReader annotation, BuildStep buildstep) {
     final buffer = StringBuffer();
-    final visitor = ModelVisitor();
-    final field = visitor.visitFieldElement(element) ?? [];
-    buffer.writeln('// ${element.name}: ${element.type}');
-    //buffer.writeln('${field['metadata']?.toString() ?? ''}');
+    final properties = Helpers.getClassProperties(FieldDateTimePicker);
+    final map = Helpers.annotationToJson<FieldDateTimePicker>(element, properties);
+    buffer.write('''
+      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved}) {
+         ${dateRangePickerField(element.name, element.type.toString(), map)};
+      }
+''');
     return buffer.toString();
   }
 }
