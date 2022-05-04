@@ -1,4 +1,4 @@
-// ignore_for_file: lines_longer_than_80_chars, omit_local_variable_types, unnecessary_statements
+// ignore_for_file: lines_longer_than_80_chars, omit_local_variable_types, unnecessary_statements, unnecessary_this
 
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
@@ -40,78 +40,110 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         }
       }
     }
-
     return values.join('\n\n');
   }
 
   String dateRangePickerField(String elementName, String type, Map<String, dynamic> map, {String? parent}) {
-    final buffer = StringBuffer();
-    // show the range dates, suffix will trigger the date range picker
-    buffer.write('''
-      void dateTimeRangePicker() async {
-        DateTimeRange picked = await showDateTimeRangePicker(
-          context: context,
-          initialDateRange: DateTimeRange(
-            start:DateTime.parse(${map['initialDate']}?.split(',').first ?? DateTime.now().toIso8601String())),
-            end:  DateTime.parse(${map['initialDate']}?.split(',').last ?? DateTime.now().add(Duration(days: 1).toIso8601String())),
-          ),
-          firstDate: DateTime.parse(${map['firstDate']} ?? DateTime.now().subtract(Duration(years: 25)).toIso8601String()),
-          lastDate: DateTime.parse(${map['lastDate']} ?? DateTime.now().add(Duration(years: 25)).toIso8601String()),
-          errorFormat: ${map['errorFormat']} ,
-          errorInvalidText: ${map['errorInvalidText']} ?? 'Invalid date',
-          fieldLabelText: ${map['fieldLabelText']} ?? 'Date',
-          fieldHintText: ${map['fieldHintText']} ?? 'Select a date',
-          builder: (BuildContext context, Widget child) {
-            return Column(
-              children: <Widget>[
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 400),
-                  child: child,
-                ),
-              ],
-            );
-          },
-        );
-        if (picked != null) {
-          setState(() {
-          _formData['$elementName'] = picked.start.toIso8601String() + ',' + picked.end.toIso8601String();
-          onSaved('$elementName', picked.start.toIso8601String() + ',' + picked.end.toIso8601String(););
-          });
-        } // if picked is null, the user canceled
-      } // dateTimeRangePicker
-
-     return Row(
-      children: <Widget>[
-        Expanded(
-          child: TextFormField(
-            decoration: InputDecoration(
-              labelText: '$elementName From',
-              suffixIcon: IconButton(
-                icon: Icon(Icons.date_range),
-                onPressed: () => dateTimeRangePicker(),
-                ),
-            ), // end InputDecoration
-            initialValue:(_formatData['$elementName'] ?? ${map['initialDate']})?.split(',').first ?? DateTime.now().format('yyyy-MM-dd'),
-            readOnly: true,
-            }, // end TextFormField
-        ), // end Expanded
-        Expanded(
-          child: TextFormField(
-            decoration: InputDecoration(
-              labelText: '$elementName end',
-              suffixIcon: IconButton(
-                icon: Icon(Icons.date_range),
-                onPressed: () => dateTimeRangePicker(),
-                ),
-            ), // end InputDecoration
-            initialValue: _formData['$elementName']['end'],
-            readOnly: true,
-            ), // end TextFormField
-        ), // end Expanded
-      ], // end Row children
-    ); // end Row
-    ''');
-    return buffer.toString();
+    return '''
+      return SizedBox(
+        height: 80,
+        child: Column(
+          children: <Widget>[
+            Row(children: const [Text('${map['label'] ?? elementName}')]),
+          Row(
+         mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 100,
+              child: InputDatePickerFormField(
+                fieldLabelText:"${map['fieldLabelStartText'] ?? 'Start Date'}",
+                initialDate: DateTime.parse("${map['initialDate']?.split(',').last ?? DateTime.now().add(const Duration(days: 25 * 365)).toIso8601String()}"),
+                firstDate: DateTime.parse("${map['firstDate'] ?? DateTime.now().subtract(const Duration(days: 25 * 365)).toIso8601String()}"),
+                lastDate: DateTime.parse("${map['lastDate'] ?? DateTime.now().add(const Duration(days: 25 * 365)).toIso8601String()}"),
+                onDateSaved: (date) {
+                  final dates = _formData['journeyDates']?.split(',') ?? [];
+                  dates[0] = date.string;
+                  onSaved('journeyDates', dates.join(','));
+                },
+                onDateSubmitted: (date) {
+                  final dates = _formData['$elementName']?.split(',') ?? [];
+                  dates[0] = date.string;
+                  onSaved('$elementName', dates.join(','));
+                },
+              ),
+            ), // InputDatePickerFormField
+            SizedBox(
+              width: 100,
+              child: InputDatePickerFormField(
+                fieldLabelText: "${map['fieldLabelEndText'] ?? 'End Date'}",
+                initialDate: DateTime.parse("${map['initialDate']?.split(',').last ?? DateTime.now().subtract(const Duration(days: 25 * 365)).toIso8601String()}"),
+                firstDate: DateTime.parse("${map['firstDate'] ?? DateTime.now().subtract(const Duration(days: 25 * 365)).toIso8601String()}"),
+                lastDate: DateTime.parse("${map['lastDate'] ?? DateTime.now().add(const Duration(days: 25 * 365)).toIso8601String()}"),
+                onDateSaved: (date) {
+                  final dates = _formData['$elementName']?.split(',') ?? [];
+                  dates[1] = date.string;
+                  onSaved('$elementName', dates.join(','));
+                },
+                onDateSubmitted: (date) {
+                  final dates = _formData['$elementName']?.split(',') ?? [];
+                  dates[1] = date.string;
+                  onSaved('$elementName', dates.join(','));
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: IconButton(
+                  onPressed: () async {
+                    DateTimeRange? date = await showDateRangePicker(
+                      context: context,
+                      initialDateRange: DateTimeRange(
+                          start:DateTime.parse("${map['initialDate']?.split(',').first ?? DateTime.now().toIso8601String()}"),
+                          end:  DateTime.parse("${map['initialDate']?.split(',').last ?? DateTime.now().toIso8601String()}"),
+                        ),
+                        firstDate: DateTime.parse("${map['firstDate'] ?? DateTime.now().subtract(const Duration(days: 25 * 365)).toIso8601String()}"),
+                        lastDate: DateTime.parse("${map['lastDate'] ?? DateTime.now().add(const Duration(days: 25 * 365)).toIso8601String()}"),
+                        helpText: '${map['helpText'] ?? 'Select ' + elementName[0].toUpperCase() + elementName.substring(1) + ' dates'}',
+                        cancelText: '${map['cancelText'] ?? 'Cancel'}',
+                        confirmText: '${map['confirmText'] ?? 'Confirm'}',
+                        saveText: '${map['saveText'] ?? 'Done'}',
+                        errorFormatText: "${map['errorFormat'] ?? 'Invalid date format'}",
+                        errorInvalidText: "${map['errorInvalidText'] ?? 'Invalid date'}",
+                        errorInvalidRangeText: "${map['errorInvalidRange'] ?? 'Invalid date range'}",
+                        fieldStartHintText: "${map['fieldStartHintText'] ?? 'Start date'}",
+                        fieldEndHintText: "${map['fieldEndHintText'] ?? 'End date'}",
+                        fieldStartLabelText: "${map['fieldStartLabelText'] ?? '$elementName start'}",
+                        fieldEndLabelText: "${map['fieldEndLabelText'] ?? '$elementName end'}",
+                        textDirection: TextDirection.${map['textDirection'] ?? 'ltr'},
+                        builder: (context, child) {
+                          return Column(
+                            children: [
+                              SizedBox(height:  MediaQuery.of(context).size.height * 0.1),
+                              ConstrainedBox(
+                                constraints:  BoxConstraints(
+                                  maxWidth: 400.0,
+                                  maxHeight: MediaQuery.of(context).size.height * 0.8,
+                                ),
+                                child: child,
+                              )
+                            ],
+                          );
+                        },
+                    );
+                     if (date != null) {
+                      _formData['$elementName'] = date.start.string + ',' + date.end.string;
+                      onSaved('$elementName', date.start.string + ',' + date.end.string);
+                    } 
+                  },
+                  icon: const Icon(Icons.calendar_today)),
+            ),
+          ], // end Row children
+        ),  // end Row
+        ], // end Column children
+      ), // end Column 
+      ) // end SizedBox
+''';
   }
 
   String dateTimePickerField(String elementName, String type, Map<String, dynamic> map, {String? parent}) {
@@ -150,8 +182,8 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
                       selectableDayPredicate: null,
                     );
                     if (date != null) {
-                      _formData['birthdate'] = date.toIso8601String();
-                      onSaved('birthdate', date.toIso8601String());
+                      _formData['$elementName'] = date.toIso8601String();
+                      onSaved('$elementName', date.toIso8601String());
                     }
                   },
                   icon: const Icon(Icons.calendar_today)),
@@ -472,4 +504,15 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   }
 
   String generateForAnnotatedField(FieldElement field, ConstantReader annotation, BuildStep buildStep);
+}
+
+extension on DateTime {
+  // ignore: unused_element
+  String get dateTimeFormat => '${this.day}-${this.month}-${this.year} ${this.hour}:${this.minute}:${this.second}';
+  // ignore: unused_element
+  String get DMY => '${this.day}-${this.month}-${this.year}';
+  // ignore: unused_element
+  String get YMD => '${this.year}-${this.month}-${this.day}';
+  // ignore: unused_element
+  String get MDY => '${this.month}-${this.day}-${this.year}';
 }
