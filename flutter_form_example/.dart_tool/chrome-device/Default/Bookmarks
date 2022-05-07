@@ -1,0 +1,64 @@
+{
+   "checksum": "d889c71d5039d3285f4eccdeaa9980c5",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13283164136665011",
+            "guid": "04895ecf-8b66-494f-bb7d-78b047df94f7",
+            "id": "12",
+            "name": "Insurance Premium Payment API | Online Recharge API | CyberPlat",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://www.cyberplat.in/cyberplat-insurance-premium-payments.html"
+         }, {
+            "date_added": "13283585081586129",
+            "guid": "182279b3-4460-4aaf-88aa-bbc83b6cabe9",
+            "id": "13",
+            "name": "VistaCreate — Free Graphic Design Software. Simple Online Photo Editor",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://crello.com/artboard/?width=800&height=800&group=SM&format=Social+media&measureUnits=px&sidebar=objects&folder=icons"
+         }, {
+            "date_added": "13283590312881067",
+            "guid": "020b1e23-0d0d-42bd-8a81-c8a7fe1225a8",
+            "id": "14",
+            "name": "App Icon Generator",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://appicon.co/"
+         } ],
+         "date_added": "13293636755625996",
+         "date_modified": "13283590312881067",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "Favorites bar",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13293636755626000",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "Other favorites",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13293636755626001",
+         "date_modified": "0",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "Mobile favorites",
+         "source": "unknown",
+         "type": "folder"
+      }
+   },
+   "sync_metadata": "Ci4KDgiIgQISCFw66gOAAQAAEgAgASoYL0JDYkYvQkFRSFBjLy9wcU9LbDRPZz09EqgBCA4SowEKHDhZSGdFc3A3RjBiSGZmWUhaSjRkaGFaVGNSQT0SJDAyMGIxZTIzLTBkMGQtNDJiZC04YTgxLWM4YTdmZTEyMjVhOBgAIAAoADDvjKXO/y84/+yZzewvQP/smc3sL0ocN2MyR1dmdWxoZmpUSGg5WjRUblk3TXZuNS9FPVofIh27bDJPN2kwb1BiS01USUhPbVh2bGNhcmVLUTE0PWVRdFd1EqcBCA0SogEKHEFNZWlvYUwxcGxWbHlWQjU0K1lVWDVSYjB4VT0SJDE4MjI3OWIzLTQ0NjAtNGFhZi04OGFhLWJiYzgzYjZjYWJlORgAIAAoADDvjKXO/y847+yZzewvQO/smc3sL0ocdmZVa3dEekpaL3J2MDk1SFh4a0NaUmpKMHVjPVoeIhx2N2IwSldOdVBzeGVhRE5wTnJ4dnZBNVhWUzg9ZTmnFuASpwEIDBKiAQocN3FLUzNMM2NDb29tOW9PbkVhdnUrM3ZIYjJjPRIkMDQ4OTVlY2YtOGI2Ni00OTRmLWJiN2QtNzhiMDQ3ZGY5NGY3GAAgACgAMO+Mpc7/Lzip5JnN7C9AqeSZzewvShxRVzdsTVlGbDI4R1JyQnE4ZUx0Z0hLTWNHTEk9Wh4iHFZqdi9xVmdoQ0hKMnUvOFkyMDRVbzUwODladz1ldFNIaRKJAQgBEoQBChx5eEovNmZ2a2VjcjdrcDVFUXpCNHRXTHBkYkU9EiRlODgwMmFhZC04MDc2LTUzZTktOTNjZS0yNGI0M2JjZjhlNDEYACAAKAAwk4K17sQuOMeAte7ELkDHgLXuxC5KHGFSQ1dMZ2hGOWI1SW5xS0lEdnVKL2p2UWtGYz1aAGUAAAAAEokBCAIShAEKHFljU1RvbnZFU1B3cUNzNEwyY3JWaHY2OEw5OD0SJDU4NzNkNDNiLTU0OTYtNWY4Ny05OTQ5LTg1MTFmMjA2YzM0MRgAIAAoADCUgrXuxC44x4C17sQuQMeAte7ELkocb1BWa2h3QlJiVjY1S0NXUjIrSU9OSFdvT3U4PVoAZQAAAAASiQEIAxKEAQocbmpnRHU4OGVDcnZYcDg2cEQ3ZkhHY3FGcDg4PRIkNjMzZTY3MDUtODhjZS01MjZjLTllOGMtNmYwYjY2YWFjMTI3GAAgACgAMJiCte7ELjjHgLXuxC5Ax4C17sQuShx5ek5CMDFjbjU0QTdjUlUwdVQrL1BnbVR0VW89WgBlAAAAADAAOAA=",
+   "version": 1
+}

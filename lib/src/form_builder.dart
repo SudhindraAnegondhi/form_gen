@@ -1,4 +1,4 @@
-// ignore_for_file: lines_longer_than_80_chars, omit_local_variable_types
+// ignore_for_file: lines_longer_than_80_chars, omit_local_variable_types, non_constant_identifier_names, unnecessary_this, unused_element
 
 import 'package:build/src/builder/build_step.dart';
 import 'package:analyzer/dart/element/element.dart';
@@ -226,14 +226,13 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
         bool get isDateRange => RegExp(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{4}-[0-9]{2}-[0-9]{2}\$').hasMatch(this);
         String get capitalize => '\${this[0].toUpperCase()}\${this.substring(1)}';
         String get capitalizeWords => this.split(' ').map((word) => word.capitalize).join(' ');
-        string camelCase() => this.split(' ').map((word) => word.capitalize).join('');
+        String camelCase() => this.split(' ').map((word) => word.capitalize).join('');
         String get camelCaseToTitleCase => this.split(' ').map((word) => word.capitalize).join(' ');
     }
 
     extension on DateTime {
       String get dateTimeFormat =>  "\${this.day}-\${this.month}-\${this.year} \${this.hour}:\${this.minute}:\${this.second}";
       String get DMY =>  '\${this.day}-\${this.month}-\${this.year}';
-      String get YMD =>  '\${this.year}-\${this.month}-\${this.day}';
       String get MDY =>  '\${this.month}-\${this.day}-\${this.year}';
       String get string => '\${this.year}-\${this.month}-\${this.day}';
     }

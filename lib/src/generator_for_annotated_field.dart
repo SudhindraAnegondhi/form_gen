@@ -45,104 +45,95 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
 
   String dateRangePickerField(String elementName, String type, Map<String, dynamic> map, {String? parent}) {
     return '''
+     void save(DateTime date, bool start) {
+       final dates = _formData['$elementName']?.split(',') ?? [];
+      dates[start ? 0 : 1] = date.toIso8601String().substring(0, 10);
+      onSaved('$elementName', dates.join(','));
+     }
       return SizedBox(
-        height: 80,
+        height: 100,
         child: Column(
-          children: <Widget>[
-            Row(children: const [Text('${map['label'] ?? elementName}')]),
-          Row(
-         mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              width: 100,
-              child: InputDatePickerFormField(
-                fieldLabelText:"${map['fieldLabelStartText'] ?? 'Start Date'}",
-                initialDate: DateTime.parse("${map['initialDate']?.split(',').last ?? DateTime.now().add(const Duration(days: 25 * 365)).toIso8601String()}"),
-                firstDate: DateTime.parse("${map['firstDate'] ?? DateTime.now().subtract(const Duration(days: 25 * 365)).toIso8601String()}"),
-                lastDate: DateTime.parse("${map['lastDate'] ?? DateTime.now().add(const Duration(days: 25 * 365)).toIso8601String()}"),
-                onDateSaved: (date) {
-                  final dates = _formData['journeyDates']?.split(',') ?? [];
-                  dates[0] = date.string;
-                  onSaved('journeyDates', dates.join(','));
-                },
-                onDateSubmitted: (date) {
-                  final dates = _formData['$elementName']?.split(',') ?? [];
-                  dates[0] = date.string;
-                  onSaved('$elementName', dates.join(','));
-                },
-              ),
-            ), // InputDatePickerFormField
-            SizedBox(
-              width: 100,
-              child: InputDatePickerFormField(
-                fieldLabelText: "${map['fieldLabelEndText'] ?? 'End Date'}",
-                initialDate: DateTime.parse("${map['initialDate']?.split(',').last ?? DateTime.now().subtract(const Duration(days: 25 * 365)).toIso8601String()}"),
-                firstDate: DateTime.parse("${map['firstDate'] ?? DateTime.now().subtract(const Duration(days: 25 * 365)).toIso8601String()}"),
-                lastDate: DateTime.parse("${map['lastDate'] ?? DateTime.now().add(const Duration(days: 25 * 365)).toIso8601String()}"),
-                onDateSaved: (date) {
-                  final dates = _formData['$elementName']?.split(',') ?? [];
-                  dates[1] = date.string;
-                  onSaved('$elementName', dates.join(','));
-                },
-                onDateSubmitted: (date) {
-                  final dates = _formData['$elementName']?.split(',') ?? [];
-                  dates[1] = date.string;
-                  onSaved('$elementName', dates.join(','));
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: IconButton(
-                  onPressed: () async {
-                    DateTimeRange? date = await showDateRangePicker(
+          Row(children: const [Text('${map['label'] ?? elementName}')]),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 100,
+                child: InputDatePickerFormField(
+                  fieldLabelText: "${map['fieldLabelStartText'] ?? 'Start Date'}",
+                  initialDate: DateTime.parse(_formData['$elementName']?.split(',')?.first ?? startDate),
+                  firstDate: DateTime.parse(firstDate),
+                  lastDate: DateTime.parse(lastDate),
+                  onDateSaved: (date) => save(date, true),
+                  onDateSubmitted: (date) => save(date, true),
+                ),
+              ), // Start Date field
+              SizedBox(
+                width: 100,
+                child: InputDatePickerFormField(
+                  fieldLabelText: "${map['fieldLabelEndText'] ?? 'End Date'}",
+                  initialDate: DateTime.parse(_formData['$elementName']?.split(',')?.last ?? endDate),
+                  firstDate: DateTime.parse(firstDate),
+                  lastDate: DateTime.parse(lastDate),
+                  onDateSaved: (date) => save(date, false),
+                  onDateSubmitted: (date) => save(date, false),
+                ), 
+              ), // End Date field
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed:  () async {
+                    final DateTimeRange? date = await showDateRangePicker(
                       context: context,
                       initialDateRange: DateTimeRange(
-                          start:DateTime.parse("${map['initialDate']?.split(',').first ?? DateTime.now().toIso8601String()}"),
-                          end:  DateTime.parse("${map['initialDate']?.split(',').last ?? DateTime.now().toIso8601String()}"),
+                          start: DateTime.parse(_formData['$elementName']?.split(',')?.first ?? startDate),
+                          end:  DateTime.parse(_formData['$elementName']?.split(',')?.last ?? endDate),
                         ),
-                        firstDate: DateTime.parse("${map['firstDate'] ?? DateTime.now().subtract(const Duration(days: 25 * 365)).toIso8601String()}"),
-                        lastDate: DateTime.parse("${map['lastDate'] ?? DateTime.now().add(const Duration(days: 25 * 365)).toIso8601String()}"),
-                        helpText: '${map['helpText'] ?? 'Select ' + elementName[0].toUpperCase() + elementName.substring(1) + ' dates'}',
-                        cancelText: '${map['cancelText'] ?? 'Cancel'}',
-                        confirmText: '${map['confirmText'] ?? 'Confirm'}',
-                        saveText: '${map['saveText'] ?? 'Done'}',
-                        errorFormatText: "${map['errorFormat'] ?? 'Invalid date format'}",
-                        errorInvalidText: "${map['errorInvalidText'] ?? 'Invalid date'}",
-                        errorInvalidRangeText: "${map['errorInvalidRange'] ?? 'Invalid date range'}",
-                        fieldStartHintText: "${map['fieldStartHintText'] ?? 'Start date'}",
-                        fieldEndHintText: "${map['fieldEndHintText'] ?? 'End date'}",
-                        fieldStartLabelText: "${map['fieldStartLabelText'] ?? '$elementName start'}",
-                        fieldEndLabelText: "${map['fieldEndLabelText'] ?? '$elementName end'}",
-                        textDirection: TextDirection.${map['textDirection'] ?? 'ltr'},
-                        builder: (context, child) {
-                          return Column(
-                            children: [
-                              SizedBox(height:  MediaQuery.of(context).size.height * 0.1),
-                              ConstrainedBox(
-                                constraints:  BoxConstraints(
-                                  maxWidth: 400.0,
-                                  maxHeight: MediaQuery.of(context).size.height * 0.8,
-                                ),
-                                child: child,
-                              )
-                            ],
-                          );
-                        },
-                    );
-                     if (date != null) {
-                      _formData['$elementName'] = date.start.string + ',' + date.end.string;
-                      onSaved('$elementName', date.start.string + ',' + date.end.string);
-                    } 
+                      firstDate: DateTime.parse(firstDate),
+                      lastDate: DateTime.parse(lastDate),
+                      helpText: '${map['helpText'] ?? 'Select ' + elementName[0].toUpperCase() + elementName.substring(1) + ' dates'}',
+                      cancelText: '${map['cancelText'] ?? 'Cancel'}',
+                      confirmText: '${map['confirmText'] ?? 'Confirm'}',
+                      saveText: '${map['saveText'] ?? 'Done'}',
+                      errorFormatText: "${map['errorFormat'] ?? 'Invalid date format'}",
+                      errorInvalidText: "${map['errorInvalidText'] ?? 'Invalid date'}",
+                      errorInvalidRangeText: "${map['errorInvalidRange'] ?? 'Invalid date range'}",
+                      fieldStartHintText: "${map['fieldStartHintText'] ?? 'Start date'}",
+                      fieldEndHintText: "${map['fieldEndHintText'] ?? 'End date'}",
+                      fieldStartLabelText: "${map['fieldStartLabelText'] ?? '$elementName start'}",
+                      fieldEndLabelText: "${map['fieldEndLabelText'] ?? '$elementName end'}",
+                      textDirection: TextDirection.${map['textDirection'] ?? 'ltr'},
+                      builder: (context, child) {
+                        return Column(
+                          children: [
+                            SizedBox(height:  MediaQuery.of(context).size.height * 0.1),
+                            ConstrainedBox(
+                              constraints:  BoxConstraints(
+                                maxWidth: 400.0,
+                                maxHeight: MediaQuery.of(context).size.height * 0.8,
+                              ),
+                              child: child,
+                            )  // ConstrainedBox
+                          ], // Column
+                        ); // Column
+                      },
+                    ); // showDateRangePicker
+                    // user picked a date, probably
+                    if (date != null) {
+                      save(date.start, true);
+                      save(date.end, false);
+                    }
                   },
-                  icon: const Icon(Icons.calendar_today)),
-            ),
-          ], // end Row children
-        ),  // end Row
+                ),
+              ), // End of Date Range Picker
+            ], // end Row children
+          ),  // end Row
         ], // end Column children
       ), // end Column 
-      ) // end SizedBox
+    ) // end SizedBox
 ''';
   }
 
@@ -160,9 +151,11 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
                   errorInvalidText: "${map['errorInvalidText'] ?? 'The date is not valid. It is earlier than first date, later than last date, or doesn\'t pass the selectable day test.'}",
                   fieldHintText: "${map['fieldHintText'] ?? 'Select a date'}",
                   fieldLabelText:" ${map['fieldLabelText'] ?? '$elementName'}",
-                  initialDate: DateTime.parse(_formData['$elementName'] ?? "${map['initialDate'] ?? '${DateTime.now().toIso8601String()}'}"),
-                  firstDate: DateTime.parse('${map['firstDate'] ?? '${DateTime.now().subtract(const Duration(days: 25 * 365)).toIso8601String()}'}'),
-                  lastDate: DateTime.parse('${map['lastDate'] ?? '${DateTime.now().toIso8601String()}'}'),
+                  initialDate: DateTime.parse(
+                    _formData['$elementName'] ?? initialDate
+                  ),
+                  firstDate: DateTime.parse(firstDate),
+                  lastDate: DateTime.parse(lastDate),
                   onDateSaved: (DateTime date) {
                     _formData['$elementName'] = date.toIso8601String();
                     onSaved('$elementName', date.toIso8601String());
@@ -176,9 +169,11 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
                   onPressed: () async {
                     DateTime? date = await showDatePicker(
                       context: context,
-                      initialDate: DateTime.parse(_formData['$elementName'] ?? "${map['initialDate'] ?? '${DateTime.now().toIso8601String()}'}"),
-                      firstDate: DateTime.parse('${map['firstDate'] ?? '${DateTime.now().subtract(const Duration(days: 25 * 365)).toIso8601String()}'}'),
-                      lastDate: DateTime.parse('${map['lastDate'] ?? '${DateTime.now().toIso8601String()}'}'),
+                      initialDate: DateTime.parse(
+                    _formData['$elementName'] ?? initialDate
+                  ),
+                  firstDate: DateTime.parse(firstDate ),
+                  lastDate: DateTime.parse(lastDate),
                       selectableDayPredicate: null,
                     );
                     if (date != null) {
@@ -240,6 +235,9 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
 
   String choiceChipField(String elementName, String type, Map<String, dynamic> map, {String? parent}) {
     String items;
+    if (!map.containsKey('inputDecoration')) {
+      map['inputDecoration'] = {};
+    }
     if (map['type'] == 'enum') {
       items = '''
         final List<Widget> chips = ${type}.values.map((value) {
@@ -405,6 +403,9 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   String textField(String elementName, String elementType, Map<String, dynamic> map, {String? parent}) {
     final initialValue = map['initialValue'] ?? '';
     final autovalidateMode = map['autovalidateMode'] ?? 'AutovalidateMode.onUserInteraction';
+    if (!map.containsKey('inputDecoration')) {
+      map['inputDecoration'] = {};
+    }
     return '''
    SizedBox(
      height: 60,
@@ -416,33 +417,33 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         obscureText: ${map['obscureText'] ?? false},
         scrollPadding: const EdgeInsets.all(5.0),
         decoration: const InputDecoration(
-          labelText: '${map['labelText'] ?? elementName[0].toUpperCase() + elementName.substring(1)}',
-          labelStyle: ${map['labelStyle'] ?? 'TextStyle(fontSize: 16.0, color: Colors.black)'},
-          floatingLabelBehavior: ${map['floatingLabelBehavior'] ?? 'FloatingLabelBehavior.auto'},
-          hintText: '${map['hintText'] ?? ''}',
-          helperText: '${map['helperText'] ?? ''}',
-          errorText: '${map['error'] ?? ''}',
-          fillColor: ${map['fillColor'] ?? 'Colors.white'},
-          hoverColor: ${map['hoverColor'] ?? 'Color.fromARGB(255, 161, 179, 239)'},
-          filled:${map['filled'] ?? 'true'},
-          errorMaxLines: ${map['errorMaxLines'] ?? '1'},
-          errorStyle: ${map['errorStyle'] ?? 'TextStyle( color: Colors.red, fontSize: 12.0 )'},
-          border: ${map['border'] ?? 'InputBorder.none'},
-          enabledBorder: ${map['enabledBorder'] ?? 'OutlineInputBorder(borderSide: BorderSide(color: Colors.white, width: 1.0))'},
-          focusedBorder: ${map['focusedBorder'] ?? 'OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 1.0))'},
-          disabledBorder: ${map['disabledBorder'] ?? 'OutlineInputBorder(borderSide: BorderSide(color: Colors.grey))'},
-          enabled: ${map['enabled'] ?? 'true'},
-          prefixIcon: ${map['prefixIcon'] ?? 'null'},
-          prefixText: ${map['prefixText'] ?? 'null'},
-          suffixIcon: ${map['suffixIcon'] ?? 'null'},
-          suffixText: ${map['suffixText'] ?? 'null'},
-          prefix: ${map['prefix'] ?? 'null'},
-          suffix: ${map['suffix'] ?? 'null'},
-          counterText: ${map['counterText'] ?? 'null'},
-          counterStyle: ${map['counterStyle'] ?? 'null'},
-          contentPadding: ${map['contentPadding'] ?? 'EdgeInsets.all(5.0)'},
-          isDense: ${map['isDense'] ?? 'false'},
-          alignLabelWithHint: ${map['alignLabelWithHint'] ?? 'false'},
+          labelText: '${map['label'] ?? map['inputDecoration']?['labelText'] ?? elementName[0].toUpperCase() + elementName.substring(1)}',
+          labelStyle: ${map['inputDecoration']?['labelStyle'] ?? 'TextStyle(fontSize: 16.0, color: Colors.black)'},
+          floatingLabelBehavior: ${map['inputDecoration']?['floatingLabelBehavior'] ?? 'FloatingLabelBehavior.auto'},
+          hintText: '${map['inputDecoration']?['hintText'] ?? ''}',
+          helperText: '${map['inputDecoration']?['helperText'] ?? ''}',
+          errorText: '${map['inputDecoration']?['error'] ?? ''}',
+          fillColor: ${map['inputDecoration']?['fillColor'] ?? 'Colors.white'},
+          hoverColor: ${map['inputDecoration']?['hoverColor'] ?? 'Color.fromARGB(255, 161, 179, 239)'},
+          filled:${map['inputDecoration']?['filled'] ?? 'true'},
+          errorMaxLines: ${map['inputDecoration']?['errorMaxLines'] ?? '1'},
+          errorStyle: ${map['inputDecoration']?['errorStyle'] ?? 'TextStyle( color: Colors.red, fontSize: 12.0 )'},
+          border: ${map['inputDecoration']?['border'] ?? 'InputBorder.none'},
+          enabledBorder: ${map['inputDecoration']?['enabledBorder'] ?? 'OutlineInputBorder(borderSide: BorderSide(color: Colors.white, width: 1.0))'},
+          focusedBorder: ${map['inputDecoration']?['focusedBorder'] ?? 'OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 1.0))'},
+          disabledBorder: ${map['inputDecoration']?['disabledBorder'] ?? 'OutlineInputBorder(borderSide: BorderSide(color: Colors.grey))'},
+          enabled: ${map['inputDecoration']?['enabled'] ?? 'true'},
+          prefixIcon: ${map['inputDecoration']?['prefixIcon'] ?? 'null'},
+          prefixText: ${map['inputDecoration']?['prefixText'] ?? 'null'},
+          suffixIcon: ${map['inputDecoration']?['suffixIcon'] ?? 'null'},
+          suffixText: ${map['inputDecoration']?['suffixText'] ?? 'null'},
+          prefix: ${map['inputDecoration']?['prefix'] ?? 'null'},
+          suffix: ${map['inputDecoration']?['suffix'] ?? 'null'},
+          counterText: ${map['inputDecoration']?['counterText'] ?? 'null'},
+          counterStyle: ${map['inputDecoration']?['counterStyle'] ?? 'null'},
+          contentPadding: ${map['inputDecoration']?['contentPadding'] ?? 'EdgeInsets.all(5.0)'},
+          isDense: ${map['inputDecoration']?['isDense'] ?? 'false'},
+          alignLabelWithHint: ${map['inputDecoration']?['alignLabelWithHint'] ?? 'false'},
 
         ),
         onSaved: (value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
@@ -450,7 +451,10 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         maxLines: ${map['maxLines'] ?? 1},
         keyboardType: TextInputType.${map['keyboardType'] ?? 'text'},
         inputFormatters: ${map['inputFormatters'] ?? 'null'},
-        ${Helpers.composeValidators(map['validators'] ?? [])}
+        ${Helpers.composeValidators(map['validators'] ?? [
+              if (map['type'] == 'email') {'type': 'email'},
+              if (map['type'] == 'number') {'type': 'number'},
+            ])}
       ), // TextFormField
     ) // SizedBox
     ''';

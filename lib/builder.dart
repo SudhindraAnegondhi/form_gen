@@ -15,7 +15,7 @@ Builder fieldChoiceChipBuilder(BuilderOptions options) => SharedPartBuilder([Fie
 
 Builder fieldDateRangePickerBuilder(BuilderOptions options) => SharedPartBuilder([FieldDateRangePickerBuilder()], 'field_date_range_picker_builder');
 
-Builder fieldDateTimePickerBuilder(BuilderOptions options) => SharedPartBuilder([FieldDateTimePickerBuilder()], 'field_date_time_picker_builder');
+Builder fieldDatePickerBuilder(BuilderOptions options) => SharedPartBuilder([FieldDatePickerBuilder()], 'field_date_picker_builder');
 
 Builder fieldDropdownBuilder(BuilderOptions options) => SharedPartBuilder([FieldDropdownBuilder()], 'field_dropdown_builder');
 

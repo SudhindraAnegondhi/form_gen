@@ -14,7 +14,7 @@ builders:
       "fieldCheckboxBuilder",
       "fieldChoiceChipBuilder",
       "fieldDateRangePickerBuilder",
-      "fieldDateTimePickerBuilder",
+      "fieldDatePickerBuilder",
       "fieldDropdownBuilder",
       "fieldFilterChipBuilder",
       "fieldRadioBuilder",

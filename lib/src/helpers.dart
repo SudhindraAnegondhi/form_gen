@@ -1,4 +1,4 @@
-// ignore_for_file: lines_longer_than_80_chars, omit_local_variable_types, unnecessary_this
+// ignore_for_file: lines_longer_than_80_chars, omit_local_variable_types, unnecessary_this, unused_element
 
 import 'dart:mirrors';
 import 'package:analyzer/dart/constant/value.dart';
@@ -105,7 +105,6 @@ class Helpers {
     return json;
   }
 
-
   /// Validators can be specified in two ways.
   /// 1. Using any of the documented validator types.
   ///    This is done by specifying the validator type in the annotation, followed by an
@@ -168,17 +167,28 @@ class Helpers {
     }
     ''';
   }
-
-
 }
 
 extension on DateTime {
-  // ignore: unused_element
   String get dateTimeFormat => '${this.day}-${this.month}-${this.year} ${this.hour}:${this.minute}:${this.second}';
-  // ignore: unused_element
   String get DMY => '${this.day}-${this.month}-${this.year}';
-  // ignore: unused_element
   String get YMD => '${this.year}-${this.month}-${this.day}';
-  // ignore: unused_element
   String get MDY => '${this.month}-${this.day}-${this.year}';
+}
+
+extension on String {
+  bool get isEmail => RegExp(r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+.[a-zA-Z]+').hasMatch(this);
+  bool get isPhone => RegExp(r'^[0-9]{10}').hasMatch(this);
+  bool get isNumeric => RegExp(r'^[0-9.]*$').hasMatch(this);
+  bool get isName => RegExp(r'^[a-zA-Z.]*$').hasMatch(this);
+  bool get isDate => RegExp(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$').hasMatch(this);
+  bool get isDateTime => RegExp(r'^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$').hasMatch(this);
+  bool get isTime => RegExp(r'^[0-9]{2}:[0-9]{2}:[0-9]{2}$').hasMatch(this);
+  bool get isDateTimeRange =>
+      RegExp(r'^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}-[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$').hasMatch(this);
+  bool get isDateRange => RegExp(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{4}-[0-9]{2}-[0-9]{2}$').hasMatch(this);
+  String get capitalize => '${this[0].toUpperCase()}${this.substring(1)}';
+  String get capitalizeWords => this.split(' ').map((word) => word.capitalize).join(' ');
+  String camelCase() => this.split(' ').map((word) => word.capitalize).join('');
+  String get camelCaseToTitleCase => this.split(' ').map((word) => word.capitalize).join(' ');
 }

@@ -14,10 +14,15 @@ class FieldDateRangePickerBuilder extends GeneratorForAnnotatedField<FieldDateRa
   @override
   String generateForAnnotatedField(FieldElement element, ConstantReader annotation, BuildStep buildstep) {
     final buffer = StringBuffer();
-    final properties = Helpers.getClassProperties(FieldDateTimePicker);
-    final map = Helpers.annotationToJson<FieldDateTimePicker>(element, properties);
+    final properties = Helpers.getClassProperties(FieldDateRangePicker);
+    final map = Helpers.annotationToJson<FieldDateRangePicker>(element, properties);
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved}) {
+        const startDate = " ${map['initialDate']?.split(',')?.first ?? DateTime.now().toIso8601String()}";
+        const endDate = "${map['initialDate']?.split(',')?.last ?? DateTime.now().toIso8601String()}";
+        const firstDate = "${map['firstDate'] ?? DateTime.now().toIso8601String()}";
+        const lastDate = "${map['lastDate'] ?? DateTime.now().toIso8601String()}";
+        assert(startDate != null);
          ${dateRangePickerField(element.name, element.type.toString(), map)};
       }
 ''');

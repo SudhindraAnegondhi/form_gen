@@ -10,14 +10,17 @@ import 'package:flutter_form_annotations/flutter_form_annotations.dart';
 import '../generator_for_annotated_field.dart';
 import '../helpers.dart';
 
-class FieldDateTimePickerBuilder extends GeneratorForAnnotatedField<FieldDateTimePicker> {
+class FieldDatePickerBuilder extends GeneratorForAnnotatedField<FieldDatePicker> {
   @override
   String generateForAnnotatedField(FieldElement element, ConstantReader annotation, BuildStep buildstep) {
     final buffer = StringBuffer();
-    final properties = Helpers.getClassProperties(FieldDateTimePicker);
-    final map = Helpers.annotationToJson<FieldDateTimePicker>(element, properties);
+    final properties = Helpers.getClassProperties(FieldDatePicker);
+    final map = Helpers.annotationToJson<FieldDatePicker>(element, properties);
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved}) {
+        const initialDate = "${map['initialDate'] ?? DateTime.now().toIso8601String()}";
+        const firstDate = "${map['firstDate'] ?? map['initialDate'] ?? DateTime.now().toIso8601String()}";
+        const lastDate = "${map['lastDate'] ?? map['initialDate'] ?? DateTime.now().toIso8601String()}";
         return ${dateTimePickerField(element.name, element.type.toString(), map)};
       }
     ''');

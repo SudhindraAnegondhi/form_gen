@@ -1,0 +1,42 @@
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+Address _$AddressFromJson(Map<String, dynamic> json) => Address(
+      street: json['street'] as String,
+      city: json['city'] as String,
+      state: json['state'] as String,
+      postcode: json['postcode'] as String,
+    );
+
+Map<String, dynamic> _$AddressToJson(Address instance) => <String, dynamic>{
+      'street': instance.street,
+      'city': instance.city,
+      'state': instance.state,
+      'postcode': instance.postcode,
+    };
+
+Profile _$ProfileFromJson(Map<String, dynamic> json) => Profile(
+      name: json['name'] as String,
+      profileType: $enumDecode(_$ProfileTypeEnumMap, json['profileType']),
+      email: json['email'] as String,
+      phone: json['phone'] as String,
+      address: Address.fromJson(json['address'] as Map<String, dynamic>),
+      about: json['about'] as String,
+      avatar: json['avatar'] as String,
+    );
+
+Map<String, dynamic> _$ProfileToJson(Profile instance) => <String, dynamic>{
+      'name': instance.name,
+      'profileType': _$ProfileTypeEnumMap[instance.profileType],
+      'email': instance.email,
+      'phone': instance.phone,
+      'address': instance.address,
+      'about': instance.about,
+      'avatar': instance.avatar,
+    };
+
+const _$ProfileTypeEnumMap = {
+  ProfileType.personal: 'personal',
+  ProfileType.professional: 'professional',
+};
