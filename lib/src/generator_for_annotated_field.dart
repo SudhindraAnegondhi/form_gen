@@ -1,11 +1,11 @@
 // ignore_for_file: lines_longer_than_80_chars, omit_local_variable_types, unnecessary_statements, unnecessary_this
 
+
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
-
-import 'helpers.dart';
+import 'package:dart_style/dart_style.dart';
 
 abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   /// Returns the annotation of type [AnnotationType] of the given [element],
@@ -41,6 +41,69 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
       }
     }
     return values.join('\n\n');
+  }
+
+  String buildValidator(List? validators) {
+    // ignore: avoid_annotating_with_dynamic
+    dynamic _quoteIfNeeded(dynamic value) {
+      if (value?.runtimeType is String) {
+        print('returning string: $value');
+        return '\"$value\"';
+      }
+      return value;
+    }
+
+    final validatorList = <String>[];
+    final List<String> customFunctions = [];
+
+    if (validators == null || validators.isEmpty) {
+      return '';
+    }
+    for (final validator in validators) {
+      final args = validator[validator.keys.first];
+      if (args is! Map) {
+        throw Exception('Args is not a map: $args');
+      }
+      print('validator:' + validator.toString());
+      final String? customFunction = args.remove('function') as String?;
+      final argList = args.keys.map((key) => 
+          '$key: ${_quoteIfNeeded(args[key])}')
+          .join('\n');
+      if (validator.keys.first == 'custom') {
+        if (customFunction == null || customFunction.trim().isEmpty || !customFunction.startsWith('custom(String? value')) {
+          throw Exception('You must specify a function to validate the field.\n$customFunction');
+        }
+        try {
+          customFunction.replaceAll('custom(String?', '_custom${customFunctions.length}(String?');
+          customFunctions.add(DartFormatter().format('$customFunction'));
+        } catch (e) {
+          throw Exception('You must specify a valid function to validate the field.\n$customFunction');
+        }
+        for (int index = 0; index < customFunctions.length; index++) {
+          validatorList.add('result = _custom${index}(value, $argList);');
+        }
+      } else {
+        print('argList: $argList');
+        validatorList.add('result = FormValidator.${validator.keys.first}(value, $argList);');
+      }
+      validatorList.add('''
+        if (result != null) {
+          errorList.add(result);
+        }
+      ''');
+    }
+    print('BUILD VALIDATOR: ');
+    print(customFunctions.toString());
+    print(validatorList.toString());
+    return '''
+    validator: (value) {
+      final errorList = <String>[];
+      String? result;
+      ${customFunctions.join('\n')}
+      ${validatorList.join('\n')}
+      return errorList.isEmpty ? null : errorList.join('\\n');
+    },
+''';
   }
 
   String dateRangePickerField(String elementName, String type, Map<String, dynamic> map, {String? parent}) {
@@ -314,7 +377,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
           initialValue: $initialValue,
           autovalidateMode: $autovalidateMode,
           onSaved: (value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
-          validator: (value) => validate('${elementName}', value, parent: '${parent ?? ''}'),
+          ${buildValidator(map['validators'] as List<Map<String, dynamic>>?)},
           onChanged: (value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
           label: '${map['label'] ?? elementName}',
           hint: '${map['hint'] ?? ''}',
@@ -451,10 +514,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         maxLines: ${map['maxLines'] ?? 1},
         keyboardType: TextInputType.${map['keyboardType'] ?? 'text'},
         inputFormatters: ${map['inputFormatters'] ?? 'null'},
-        ${Helpers.composeValidators(map['validators'] ?? [
-              if (map['type'] == 'email') {'type': 'email'},
-              if (map['type'] == 'number') {'type': 'number'},
-            ])}
+        ${buildValidator(map['validators'] as List?)}
       ), // TextFormField
     ) // SizedBox
     ''';

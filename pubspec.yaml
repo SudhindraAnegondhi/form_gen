@@ -6,7 +6,8 @@ homepage: https://bitbucket.org/IndeDude/form_generator
 environment:
   sdk: ">=2.16.0 <3.0.0"
 
-dependencies:
+dependencies: 
+  dart_style: ^2.2.3
  
 dev_dependencies:
   build: ^2.2.1

@@ -14,9 +14,7 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
     final buffer = StringBuffer();
     final properties = Helpers.getClassProperties(FormBuilder);
     final classMap = Helpers.annotationToJson<FormBuilder>(element, properties);
-
     final bool needScaffold = (classMap['needScaffold'] ?? true) as bool;
-    print('Need scaffold $needScaffold');
     final bool allowNullOrEmpty = (classMap['allowNullOrEmpty'] ?? true) as bool;
     final ModelVisitor visitor = ModelVisitor();
     element.visitChildren(visitor);

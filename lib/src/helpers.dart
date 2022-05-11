@@ -73,7 +73,13 @@ class Helpers {
     } else if (dartObject.type!.toString().startsWith('Map')) {
       final Map<String, dynamic> map = {};
       for (final key in dartObject.toMapValue()!.keys.toList()) {
-        map[key?.toStringValue() ?? ' '] = decodeDartObject(dartObject.toMapValue()?[key]);
+        if (key?.type.toString() == 'FieldValidator') {
+          final str = key!.getField('_name').toString().split("'")[1];
+          map['$str'] = decodeDartObject(dartObject.toMapValue()?[key]);
+          print('Map Value: ${map['$str'].toString()}');
+        } else {
+          map[key?.toStringValue() ?? ' '] = decodeDartObject(dartObject.toMapValue()?[key]);
+        }
       }
       return map;
     } else {
@@ -115,7 +121,7 @@ class Helpers {
   ///    the function must return a null if the value is valid, or a string describing the error.
   ///
   // ignore: avoid_annotating_with_dynamic
-  static String composeValidators(dynamic validators) {
+  static String _composeValidators(dynamic validators) {
     if (validators is! List) {
       throw Exception('Validators must be a list, but got ${validators.runtimeType} : $validators');
     }
