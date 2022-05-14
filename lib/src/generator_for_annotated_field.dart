@@ -1,6 +1,5 @@
 // ignore_for_file: lines_longer_than_80_chars, omit_local_variable_types, unnecessary_statements, unnecessary_this
 
-
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
@@ -46,8 +45,12 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   String buildValidator(List? validators) {
     // ignore: avoid_annotating_with_dynamic
     dynamic _quoteIfNeeded(dynamic value) {
-      if (value?.runtimeType is String) {
+      print('Try quote $value ${value.runtimeType.toString()}');
+      if (value?.runtimeType.toString() == 'String') {
         print('returning string: $value');
+        if (RegExp(r'^".*"$').hasMatch(value as String)) {
+          return value;
+        }
         return '\"$value\"';
       }
       return value;
@@ -66,9 +69,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
       }
       print('validator:' + validator.toString());
       final String? customFunction = args.remove('function') as String?;
-      final argList = args.keys.map((key) => 
-          '$key: ${_quoteIfNeeded(args[key])}')
-          .join('\n');
+      final argList = args.keys.map((key) => '$key: ${_quoteIfNeeded(args[key])}').join(',');
       if (validator.keys.first == 'custom') {
         if (customFunction == null || customFunction.trim().isEmpty || !customFunction.startsWith('custom(String? value')) {
           throw Exception('You must specify a function to validate the field.\n$customFunction');
@@ -84,7 +85,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         }
       } else {
         print('argList: $argList');
-        validatorList.add('result = FormValidator.${validator.keys.first}(value, $argList);');
+        validatorList.add('result = FormValidator.${validator.keys.first}(value, $argList);\n');
       }
       validatorList.add('''
         if (result != null) {
@@ -92,9 +93,6 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         }
       ''');
     }
-    print('BUILD VALIDATOR: ');
-    print(customFunctions.toString());
-    print(validatorList.toString());
     return '''
     validator: (value) {
       final errorList = <String>[];
@@ -126,7 +124,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
                 width: 100,
                 child: InputDatePickerFormField(
                   fieldLabelText: "${map['fieldLabelStartText'] ?? 'Start Date'}",
-                  initialDate: DateTime.parse(_formData['$elementName']?.split(',')?.first ?? startDate),
+                  initialDate: DateTime.parse(initialStartDate),
                   firstDate: DateTime.parse(firstDate),
                   lastDate: DateTime.parse(lastDate),
                   onDateSaved: (date) => save(date, true),
@@ -137,7 +135,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
                 width: 100,
                 child: InputDatePickerFormField(
                   fieldLabelText: "${map['fieldLabelEndText'] ?? 'End Date'}",
-                  initialDate: DateTime.parse(_formData['$elementName']?.split(',')?.last ?? endDate),
+                  initialDate: DateTime.parse(initialEndDate),
                   firstDate: DateTime.parse(firstDate),
                   lastDate: DateTime.parse(lastDate),
                   onDateSaved: (date) => save(date, false),
@@ -152,8 +150,8 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
                     final DateTimeRange? date = await showDateRangePicker(
                       context: context,
                       initialDateRange: DateTimeRange(
-                          start: DateTime.parse(_formData['$elementName']?.split(',')?.first ?? startDate),
-                          end:  DateTime.parse(_formData['$elementName']?.split(',')?.last ?? endDate),
+                          start: DateTime.parse(initialStartDate),
+                          end: DateTime.parse(initialEndDate),
                         ),
                       firstDate: DateTime.parse(firstDate),
                       lastDate: DateTime.parse(lastDate),

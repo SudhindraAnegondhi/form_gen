@@ -76,7 +76,7 @@ class Helpers {
         if (key?.type.toString() == 'FieldValidator') {
           final str = key!.getField('_name').toString().split("'")[1];
           map['$str'] = decodeDartObject(dartObject.toMapValue()?[key]);
-          print('Map Value: ${map['$str'].toString()}');
+          //print('Field Validator Map Value: ${map['$str'].toString()} keys: ${map['$str'].keys.toString()}');
         } else {
           map[key?.toStringValue() ?? ' '] = decodeDartObject(dartObject.toMapValue()?[key]);
         }

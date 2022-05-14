@@ -18,11 +18,16 @@ class FieldDateRangePickerBuilder extends GeneratorForAnnotatedField<FieldDateRa
     final map = Helpers.annotationToJson<FieldDateRangePicker>(element, properties);
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved}) {
-        const startDate = " ${map['initialDate']?.split(',')?.first ?? DateTime.now().toIso8601String()}";
-        const endDate = "${map['initialDate']?.split(',')?.last ?? DateTime.now().toIso8601String()}";
-        const firstDate = "${map['firstDate'] ?? DateTime.now().toIso8601String()}";
-        const lastDate = "${map['lastDate'] ?? DateTime.now().toIso8601String()}";
-        assert(startDate != null);
+        final initialStartDate = (_formData['${element.name}']?.split(',').first ??  "map['startDate' ] ?? DateTime.now().toIso8601String()}").substring(0, 10);
+        final initialEndDate = (_formData['${element.name}']?.split(',')?.first ?? "${map['endDate'] ?? DateTime.now().add(const Duration(days: 1)).toIso8601String()}").substring(0, 10);
+        String firstDate = "${map['firstDate'] ?? ''}";
+        String lastDate = "${map['lastDate'] ?? ''}";
+        if(firstDate.isEmpty) {
+          firstDate = DateTime.parse(initialStartDate).subtract(const Duration(days: 365)).toIso8601String().substring(0, 10);
+        }
+       if(lastDate.isEmpty) {
+          lastDate = DateTime.parse(initialEndDate).add(const Duration(days: 365)).toIso8601String().substring(0, 10);
+        }
          ${dateRangePickerField(element.name, element.type.toString(), map)};
       }
 ''');

@@ -25,7 +25,8 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
 
     buffer.writeln('class $className extends StatefulWidget {');
     buffer.write('''
-      // ignore_for_file: unused_element, unnecessary_this
+      // ignore_for_file: unused_element, unnecessary_this, non_constant_identifier_names
+      
         const $className({Key? key, this.model, this.onSubmit, this.allowNullOrEmpty = false, this.needScaffold= true,   this.showAppBar = true, this.appBar,
       this.size, this.textStyle, this.color, this.textColor, this.headlineStyle, 
       this.backgroundColor, this.backgroundImage, this.backgroundImageFit,}) : super(key: key);
