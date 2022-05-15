@@ -4,6 +4,7 @@ export 'field_choice_chip.dart';
 export 'field_date_range_picker.dart';
 export 'field_date_time_picker.dart';
 export 'field_dropdown.dart';
+export 'field_dropdown_hide_underline.dart';
 export 'field_filter_chip.dart';
 export 'field_radio_group.dart';
 export 'field_range_slider.dart';

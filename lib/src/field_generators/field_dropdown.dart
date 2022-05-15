@@ -18,7 +18,12 @@ class FieldDropdownBuilder extends GeneratorForAnnotatedField<FieldDropdown> {
     final map = Helpers.annotationToJson<FieldDropdown>(element, properties);
 
     buffer.write('''
-      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved}) {
+      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved,required double width}) {
+        double maxWidth = 0;
+        final options = ${map['options'] ?? []};
+        for (var e in options) {
+          maxWidth = max(maxWidth, e['value'].toString().length * 1.0);
+        }
         return ${dropdownField(element.name, element.type.toString(), map)};
       }
     ''');

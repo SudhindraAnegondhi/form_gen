@@ -1,5 +1,5 @@
 // **************************************************************************
-// Generator: FieldTextBuilder
+// Generator: FieldDropdownHideUnderlineBuilder
 // **************************************************************************
 // ignore_for_file: lines_longer_than_80_chars
 
@@ -10,18 +10,24 @@ import 'package:flutter_form_annotations/flutter_form_annotations.dart';
 import '../generator_for_annotated_field.dart';
 import '../helpers.dart';
 
-class FieldTextBuilder extends GeneratorForAnnotatedField<FieldText> {
+class FieldDropdownHideUnderlineBuilder extends GeneratorForAnnotatedField<FieldDropdownHideUnderline> {
   @override
   String generateForAnnotatedField(FieldElement element, ConstantReader annotation, BuildStep buildstep) {
     final buffer = StringBuffer();
-    final properties = Helpers.getClassProperties(FieldText);
-    final map = Helpers.annotationToJson<FieldText>(element, properties);
-   
+    final properties = Helpers.getClassProperties(FieldDropdown);
+    final map = Helpers.annotationToJson<FieldDropdown>(element, properties);
+
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved, required double width}) {
-        return ${textField(element.name, element.type.toString(), map)};
+        double maxWidth = 0;
+        final options = ${map['options'] ?? []};
+        for (var e in options) {
+          maxWidth = max(maxWidth, e['value'].toString().length * 1.0);
+        }
+        return ${dropdownHideUnderlineField(element.name, element.type.toString(), map)};
       }
     ''');
+
     return buffer.toString();
   }
 }

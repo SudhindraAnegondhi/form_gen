@@ -18,7 +18,7 @@ class FieldRadioBuilder extends GeneratorForAnnotatedField<FieldRadio> {
     final map = Helpers.annotationToJson<FieldRadio>(element, properties);
 
     buffer.write('''
-      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved}) {
+      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved, required double width}) {
       
          ${radioField(element.name, element.type.toString(), map)};
       }

@@ -16,6 +16,7 @@ builders:
       "fieldDateRangePickerBuilder",
       "fieldDatePickerBuilder",
       "fieldDropdownBuilder",
+      "fieldDropdownHideUnderlineBuilder",
       "fieldFilterChipBuilder",
       "fieldRadioBuilder",
       "fieldRangeSliderBuilder",

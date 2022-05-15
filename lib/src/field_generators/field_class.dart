@@ -23,14 +23,13 @@ class FieldClassBuilder extends GeneratorForAnnotatedField<FieldClass> {
 
     // some prior preps
     buffer.write('''
-      Widget ${element.name}FormField(BuildContext context,  Map<String, dynamic> _formData, {required Function onSaved}) {
+      Widget ${element.name}FormField(BuildContext context,  Map<String, dynamic> _formData, {required Function onSaved, required double width}) {
         _formData['${element.name}'] ??= ${element.name[0].toUpperCase() + element.name.substring(1)}().toJson();
         return Column(
           children: <Widget>[
     ''');
 
     for (final Map<String, dynamic> map in classMap['properties'] ?? []) {
-      // TODO: add support for other types
       switch (map['annotation']) {
         case 'FieldDropdown':
           buffer.writeln('${dropdownField(map['name'] as String, map['type'] as String, map)},\n');

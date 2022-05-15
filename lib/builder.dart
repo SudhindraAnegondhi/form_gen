@@ -2,6 +2,7 @@
 
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
+import 'src/field_generators/field_dropdown_hide_underline.dart';
 import 'src/form_builder.dart';
 import 'src/field_generators/field_generators.dart';
 
@@ -18,6 +19,9 @@ Builder fieldDateRangePickerBuilder(BuilderOptions options) => SharedPartBuilder
 Builder fieldDatePickerBuilder(BuilderOptions options) => SharedPartBuilder([FieldDatePickerBuilder()], 'field_date_picker_builder');
 
 Builder fieldDropdownBuilder(BuilderOptions options) => SharedPartBuilder([FieldDropdownBuilder()], 'field_dropdown_builder');
+
+Builder fieldDropdownHideUnderlineBuilder(BuilderOptions options) =>
+    SharedPartBuilder([FieldDropdownHideUnderlineBuilder()], 'field_dropdown_hide_underline_builder');
 
 Builder fieldFilterChipBuilder(BuilderOptions options) => SharedPartBuilder([FieldFilterChipBuilder()], 'field_filter_chip_builder');
 

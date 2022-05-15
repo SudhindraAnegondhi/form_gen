@@ -17,7 +17,7 @@ class FieldRangeSliderBuilder extends GeneratorForAnnotatedField<FieldRangeSlide
     final properties = Helpers.getClassProperties(FieldRangeSlider);
     final map = Helpers.annotationToJson<FieldRangeSlider>(element, properties);
     buffer.write('''
-      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved}) {
+      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved, required double width}) {
          ${rangeSliderField(element.name, element.type.toString(), map)};
       }
     ''');

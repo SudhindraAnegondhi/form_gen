@@ -20,8 +20,7 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
     element.visitChildren(visitor);
     final className = '${visitor.className}Form'; // EX: 'ModelForm' for 'Model'.
     final fields = '{' + visitor.fields.keys.map((key) => "'$key': null").toList().join(',\n') + '}';
-    final formFieldList =
-        visitor.fields.keys.map((key) => 'SizedBox(width: 400, child: ${key}FormField(context, _formData, onSaved:onSaved,),)').toList().join(',\n');
+    final formFieldList = visitor.fields.keys.map((key) => '${key}FormField(context, _formData, onSaved:onSaved,width: _width)').toList().join(',\n');
 
     buffer.writeln('class $className extends StatefulWidget {');
     buffer.write('''
@@ -56,13 +55,22 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
         final _formKey = GlobalKey<FormState>();
         final _formData = <String, dynamic>{};
         final bool _allowNullOrEmpty = $allowNullOrEmpty;
+        double _width = 600;
         @override
         void initState() {
           super.initState();
+         
           _formData.addAll(widget.model?.toJson() ?? $fields );
         }
-
-        double min(double a, double b) => a < b ? a : b;
+        void setWidth() {
+          _width = min(widget.size?.width ?? MediaQuery.of(context).size.width, 600);
+        }
+      @override
+        void didChangeDependencies() {
+          setWidth();
+          super.didChangeDependencies();
+        }
+      
     ''');
 
     buffer.write('''
@@ -165,17 +173,12 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Expanded( // 6. Expanded
-                            flex: 9,
-                            child: SingleChildScrollView( // 7. SingleChildScrollView
-                              child: Column(  // 8. Column
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  $formFieldList
-                                ],
-                              ), // 8. Column
-                            ), // 7. SingleChildScrollView
+                            child: ListView(
+                              shrinkWrap: true,
+                              children: <Widget>[
+                                $formFieldList
+                              ],
+                            ),
                          ), // 6. Expanded
                           Padding( // 9. Padding
                             padding: const EdgeInsets.all(8.0),

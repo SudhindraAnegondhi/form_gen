@@ -17,7 +17,7 @@ class FieldSwitchBuilder extends GeneratorForAnnotatedField<FieldSwitch> {
     final properties = Helpers.getClassProperties(FieldSwitch);
     final map = Helpers.annotationToJson<FieldSwitch>(element, properties);
     buffer.write('''
-      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved}) {
+      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved, reuired double width}) {
         return ${switchField(element.name, element.type.toString(), map)};
       }
     ''');

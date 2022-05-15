@@ -1,5 +1,5 @@
 // **************************************************************************
-// Generator: FieldTextBuilder
+// Generator: FieldDateTimePickerBuilder
 // **************************************************************************
 // ignore_for_file: lines_longer_than_80_chars, omit_local_variable_types, unnecessary_cast
 
@@ -18,7 +18,7 @@ class FieldDatePickerBuilder extends GeneratorForAnnotatedField<FieldDatePicker>
     final properties = Helpers.getClassProperties(FieldDatePicker);
     final map = Helpers.annotationToJson<FieldDatePicker>(element, properties);
     buffer.write('''
-      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved}) {
+      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved, required double width}) {
         String? initialDate = "${map['initialDate'] ?? ''}";
         if(initialDate.isEmpty) {
           initialDate = null;
@@ -40,7 +40,10 @@ class FieldDatePickerBuilder extends GeneratorForAnnotatedField<FieldDatePicker>
           lastDate = DateTime.parse(firstDate).add(const Duration(days: 1)).toIso8601String();
         } 
      
-        return ${dateTimePickerField(element.name, element.type.toString(), map)};
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 15.0), 
+          child: ${dateTimePickerField(element.name, element.type.toString(), map)},
+        );
       }
     ''');
     return buffer.toString();

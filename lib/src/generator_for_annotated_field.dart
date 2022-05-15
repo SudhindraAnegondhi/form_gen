@@ -45,9 +45,9 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   String buildValidator(List? validators) {
     // ignore: avoid_annotating_with_dynamic
     dynamic _quoteIfNeeded(dynamic value) {
-      print('Try quote $value ${value.runtimeType.toString()}');
+      //  print('Try quote $value ${value.runtimeType.toString()}');
       if (value?.runtimeType.toString() == 'String') {
-        print('returning string: $value');
+        //  print('returning string: $value');
         if (RegExp(r'^".*"$').hasMatch(value as String)) {
           return value;
         }
@@ -67,7 +67,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
       if (args is! Map) {
         throw Exception('Args is not a map: $args');
       }
-      print('validator:' + validator.toString());
+      //  print('validator:' + validator.toString());
       final String? customFunction = args.remove('function') as String?;
       final argList = args.keys.map((key) => '$key: ${_quoteIfNeeded(args[key])}').join(',');
       if (validator.keys.first == 'custom') {
@@ -84,7 +84,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
           validatorList.add('result = _custom${index}(value, $argList);');
         }
       } else {
-        print('argList: $argList');
+        //  print('argList: $argList');
         validatorList.add('result = FormValidator.${validator.keys.first}(value, $argList);\n');
       }
       validatorList.add('''
@@ -483,7 +483,6 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
           floatingLabelBehavior: ${map['inputDecoration']?['floatingLabelBehavior'] ?? 'FloatingLabelBehavior.auto'},
           hintText: '${map['inputDecoration']?['hintText'] ?? ''}',
           helperText: '${map['inputDecoration']?['helperText'] ?? ''}',
-          errorText: '${map['inputDecoration']?['error'] ?? ''}',
           fillColor: ${map['inputDecoration']?['fillColor'] ?? 'Colors.white'},
           hoverColor: ${map['inputDecoration']?['hoverColor'] ?? 'Color.fromARGB(255, 161, 179, 239)'},
           filled:${map['inputDecoration']?['filled'] ?? 'true'},
@@ -525,6 +524,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     if (map['type'] == 'enum') {
       items = '''
        ${elementType}.values.map((value) {
+              maxWidth =  max(value.toString().split('.').last.length * 1.0, maxWidth);
               return DropdownMenuItem(
                 value: value.toString().split('.').last,
                 child: Text(value.toString().split('.').last),
@@ -545,24 +545,66 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     }
 
     return '''
-    DropdownButtonFormField(
+    SizedBox(
+      width: min(width, maxWidth * 10),
+      child:DropdownButtonFormField(
           value: ${parent == null ? "_formData['$elementName'] ?? $initialValue" : "_formData['$parent']['$elementName'] ?? $initialValue"},
    
           decoration: const InputDecoration(
             labelText: '${map['label'] ?? elementName[0].toUpperCase() + elementName.substring(1)}',
             hintText: '${map['hint'] ?? ''}',
             helperText: '${map['helper'] ?? ''}',
-            errorText: '${map['error'] ?? ''}',
           ),
           items: $items,
           onChanged:  (value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
-          validator: (value) {
-            if (value == null) {
-              return '${map['error']} ?? "Please select a value"';
-            }
-            return null;
-          },
-        )''';
+        ), // DropdownButtonFormField
+      ) // SizedBox
+    ''';
+  } // dropdownField
+
+  // ignore: avoid_annotating_with_dynamic
+  String dropdownHideUnderlineField(String elementName, String elementType, Map<String, dynamic> map, {String? parent}) {
+    String items;
+    String initialValue;
+    if (map['type'] == 'enum') {
+      items = '''
+       ${elementType}.values.map((value) {
+              maxWidth =  max(value.toString().split('.').last.length * 1.0, maxWidth);
+              return DropdownMenuItem(
+                value: value.toString().split('.').last,
+                child: Text(value.toString().split('.').last),
+              );
+            }).toList()
+      ''';
+      initialValue = '${elementType}.values.first.toString().split(\'.\').last';
+    } else {
+      items = '[' +
+          (map['options'] as List<Map<String, dynamic>>)
+              .map((e) =>
+                  'const DropdownMenuItem<String>(value: "${e['value'].toString().split('.').last}",' +
+                  'child: const Text("${e['label'] ?? e['value'].toString().split('.').last}"))')
+              .toList()
+              .join(',\n') +
+          ']';
+      initialValue = (map['options'] as List<Map<String, dynamic>>).map((e) => "'e['value'].toString()'").toList().first;
+    }
+
+    return '''
+    SizedBox(
+      width: min(width, maxWidth * 10),
+      child: DropdownButtonHideUnderlineFormField(
+        child: ButtonTheme(
+          alignedDropdown: true,
+          child: DropdownButton(
+            value: ${parent == null ? "_formData['$elementName'] ?? $initialValue" : "_formData['$parent']['$elementName'] ?? $initialValue"},
+            items: $items,
+            onChanged:  (value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
+            ${buildValidator(map['validators'] as List?)}
+          ), // DropdownButton
+        ), // ButtonTheme
+      ), // DropdownButtonHideUnderlineFormField
+    ) // SizedBox
+    ''';
   }
 
   String generateForAnnotatedField(FieldElement field, ConstantReader annotation, BuildStep buildStep);

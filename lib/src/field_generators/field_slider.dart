@@ -18,7 +18,7 @@ class FieldSliderBuilder extends GeneratorForAnnotatedField<FieldSlider> {
     final properties = Helpers.getClassProperties(FieldSlider);
     final map = Helpers.annotationToJson<FieldSlider>(element, properties);
     buffer.write('''
-      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved}) {
+      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved, required double width}) {
         return ${sliderField(element.name, element.type.toString(), map)};
       }
     ''');
