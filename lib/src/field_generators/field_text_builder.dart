@@ -16,10 +16,11 @@ class FieldTextBuilder extends GeneratorForAnnotatedField<FieldText> {
     final buffer = StringBuffer();
     final properties = Helpers.getClassProperties(FieldText);
     final map = Helpers.annotationToJson<FieldText>(element, properties);
-   
+    
+
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved, required double width}) {
-        return ${textField(element.name, element.type.toString(), map)};
+        return ${textFormField(element.name, element.type.toString(), map)};
       }
     ''');
     return buffer.toString();

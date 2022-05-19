@@ -11,17 +11,28 @@ import '../generator_for_annotated_field.dart';
 import '../helpers.dart';
 
 class FieldSliderBuilder extends GeneratorForAnnotatedField<FieldSlider> {
-  
   @override
   String generateForAnnotatedField(FieldElement element, ConstantReader annotation, BuildStep buildstep) {
     final buffer = StringBuffer();
     final properties = Helpers.getClassProperties(FieldSlider);
     final map = Helpers.annotationToJson<FieldSlider>(element, properties);
+    String? parent; // FOR NOW
     buffer.write('''
-      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved, required double width}) {
+      Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved,
+       required double width}) {
+        String semanticLabel = '\${_formData['${element.name}'] ?? ${map['value'] ?? map['min'] ?? 0.0}}';
+        String __semanticFormatter(double value) {
+         Future.delayed(Duration.zero, () => onSaved('${element.name}', value, parent: '${parent ?? ''}'));
+         ${map['semanticFormatter'] == null ? "return '\${value.toStringAsFixed(0)}';" : '''
+         String callback(double value) ${map['semanticFormatter']}
+         semanticLabel = callback(value);
+         return semanticLabel;
+         '''}
+        }
         return ${sliderField(element.name, element.type.toString(), map)};
       }
     ''');
+    print('Buffer: ${buffer.toString()}');
     return buffer.toString();
   }
 }

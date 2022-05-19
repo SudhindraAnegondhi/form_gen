@@ -42,12 +42,10 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
     return values.join('\n\n');
   }
 
-  String buildValidator(List? validators) {
+  String buildValidator(List? validators, {bool functionOnly = false}) {
     // ignore: avoid_annotating_with_dynamic
     dynamic _quoteIfNeeded(dynamic value) {
-      //  print('Try quote $value ${value.runtimeType.toString()}');
       if (value?.runtimeType.toString() == 'String') {
-        //  print('returning string: $value');
         if (RegExp(r'^".*"$').hasMatch(value as String)) {
           return value;
         }
@@ -93,15 +91,16 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         }
       ''');
     }
-    return '''
-    validator: (value) {
-      final errorList = <String>[];
-      String? result;
-      ${customFunctions.join('\n')}
-      ${validatorList.join('\n')}
-      return errorList.isEmpty ? null : errorList.join('\\n');
-    },
-''';
+    final result = '''
+     ${functionOnly ? 'String? validator' : 'validator:'} (value) {
+        final errorList = <String>[];
+        String? result;
+        ${customFunctions.join('\n')}
+        ${validatorList.join('\n')}
+        return errorList.isEmpty ? null : errorList.join('\\n');
+      ${functionOnly ? '}' : '},'}
+    ''';
+    return result;
   }
 
   String dateRangePickerField(String elementName, String type, Map<String, dynamic> map, {String? parent}) {
@@ -436,32 +435,65 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   }
 
   String sliderField(String elementName, String elementType, Map<String, dynamic> map, {String? parent}) {
-    final initialValue = map['initialValue'] ?? 0.0;
-    final autovalidateMode = map['autovalidateMode'] ?? 'AutovalidateMode.onUserInteraction';
+    final initialValue = map['value'] ?? map['min'] ?? 0.0;
     return '''
       SizedBox(
         height: 60,
-        child: Slider(
-          // autovalidateMode: $autovalidateMode,
-          value:  initialValue: ${parent == null ? "_formData['$elementName'] ?? '$initialValue'" : "_formData['$parent']?['$elementName'] ?? '$initialValue'"},,
-          min: ${map['min'] ?? 0},
-          max: ${map['max'] ?? 100},
-          divisions: ${map['divisions'] ?? 1},
-          label: '${map['label'] ?? elementName}',
-          onChanged:(value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
-          activeColor: map['activeColor'] ?? Colors.blue,
-          inactiveColor: map['inactiveColor'] ?? Colors.grey,
-          thumbColor: map['thumbColor'] ?? Colors.blue,
-          semanticFormatterCallback: (double value) => value.toStringAsFixed(1),
-          onChangeStart: map['onChangeStart'] ,
-          onChangeEnd: map['onChangeEnd'] ,
-          sliderTheme: SliderTheme.of(context).copyWith(map['sliderTheme'] ?? {}),
-        ),
-
+        child: Row(
+          children: [
+            const Text('${map['label'] ?? elementName}'),
+            Slider(
+              value: ${parent == null ? "_formData['$elementName'] ?? $initialValue" : "_formData['$parent']?['$elementName'] ?? $initialValue"},
+              min: ${map['min']},
+              max: ${map['max']},
+              divisions: ${map['divisions']},
+              label: semanticLabel,
+              onChanged:(value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
+              activeColor: ${map['activeColor'] ?? 'Colors.blue'},
+              inactiveColor: ${map['inactiveColor'] ?? 'Colors.grey'},
+              thumbColor: ${map['thumbColor'] ?? 'Colors.amber'},
+              mouseCursor: ${map['mouseCursor']},
+              semanticFormatterCallback: (double value) => __semanticFormatter(value),
+              onChangeStart: ${map['onChangeStart']},
+              onChangeEnd: ${map['onChangeEnd']},
+            ), // Slider
+            ${(map['suffix'] ?? false) == true ? '' : 'Text(semanticLabel),'}
+          ],
+        ), // Row
+      ) // SizedBox
 ''';
   }
 
-  String textField(String elementName, String elementType, Map<String, dynamic> map, {String? parent}) {
+  String keyboardType(String type) {
+    switch (type) {
+      case 'number':
+        return 'TextInputType.number';
+
+      case 'multiline':
+        return 'TextInputType.multiline';
+      case 'phone':
+        return 'TextInputType.phone';
+      case 'emailAddress':
+        return 'TextInputType.emailAddress';
+      case 'url':
+        return 'TextInputType.url';
+      case 'datetime':
+        return 'TextInputType.datetime';
+      case 'visiblePassword':
+        return 'TextInputType.visiblePassword';
+      case 'name':
+        return 'TextInputType.name';
+      case 'streetAddress':
+        return 'TextInputType.streetAddress';
+      case 'none':
+        return 'TextInputType.none';
+      case 'text':
+      default:
+        return 'TextInputType.text';
+    }
+  }
+
+  String textFormField(String elementName, String elementType, Map<String, dynamic> map, {String? parent}) {
     final initialValue = map['initialValue'] ?? '';
     final autovalidateMode = map['autovalidateMode'] ?? 'AutovalidateMode.onUserInteraction';
     if (!map.containsKey('inputDecoration')) {
@@ -472,11 +504,15 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
      height: 60,
      child:
    TextFormField(
-        initialValue: ${parent == null ? "_formData['$elementName'] ?? '$initialValue'" : "_formData['$parent']?['$elementName'] ?? '$initialValue'"},
-        autovalidateMode: $autovalidateMode,
+        autocorrect: ${map['autocorrect'] ?? true},
+        autofillHints: ${map['autofillHints'] ?? null},
         autofocus: ${map['autoFocus'] ?? true},
-        obscureText: ${map['obscureText'] ?? false},
-        scrollPadding: const EdgeInsets.all(5.0),
+        autovalidateMode: $autovalidateMode,
+        buildCounter: ${map['buildCounter'] ?? null},
+        cursorColor: ${map['cursorColor'] ?? 'Colors.blue'},
+        cursorHeight: ${map['cursorHeight'] ?? 1.0},
+        cursorRadius: ${map['cursorRadius'] ?? 'const Radius.circular(2)'},
+        cursorWidth: ${map['cursorWidth'] ?? 1.0},
         decoration: const InputDecoration(
           labelText: '${map['label'] ?? map['inputDecoration']?['labelText'] ?? elementName[0].toUpperCase() + elementName.substring(1)}',
           labelStyle: ${map['inputDecoration']?['labelStyle'] ?? 'TextStyle(fontSize: 16.0, color: Colors.black)'},
@@ -502,15 +538,29 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
           counterText: ${map['inputDecoration']?['counterText'] ?? 'null'},
           counterStyle: ${map['inputDecoration']?['counterStyle'] ?? 'null'},
           contentPadding: ${map['inputDecoration']?['contentPadding'] ?? 'EdgeInsets.all(5.0)'},
-          isDense: ${map['inputDecoration']?['isDense'] ?? 'false'},
+          isDense: ${map['inputDecoration']?['isDense'] ?? 'true'},
           alignLabelWithHint: ${map['inputDecoration']?['alignLabelWithHint'] ?? 'false'},
-
         ),
-        onSaved: (value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
-        onChanged:(value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
-        maxLines: ${map['maxLines'] ?? 1},
-        keyboardType: TextInputType.${map['keyboardType'] ?? 'text'},
+        enabled: ${map['enabled'] ?? 'true'},
+        enableIMEPersonalizedLearning: ${map['enableIMEPersonalizedLearning'] ?? 'false'},
+        enableInteractiveSelection: ${map['enableInteractiveSelection'] ?? 'true'},
+        enableSuggestions: ${map['enableSuggestions'] ?? 'true'},
+        expands: ${map['expands'] ?? 'true'},
+        focusNode: ${map['focusNode'] ?? 'null'},
+        initialValue: ${parent == null ? "_formData['$elementName'] ?? '$initialValue'" : "_formData['$parent']?['$elementName'] ?? '$initialValue'"},
         inputFormatters: ${map['inputFormatters'] ?? 'null'},
+        keyboardAppearance: ${map['keyboardAppearance'] ?? 'Brightness.light'},
+        keyboardType: ${keyboardType((map['keyboardType'] ?? map['type'] ?? 'none').toString())},
+        maxLength: ${map['maxLength'] ?? 'null'},
+        maxLengthEnforcement: ${map['maxLengthEnforcement'] ?? 'null'},
+        maxLines: ${map['maxLines'] ?? 'null'},
+        minLines: ${map['minLines'] ?? 'null'},
+        mouseCursor: ${map['mouseCursor'] ?? 'null'},
+        obscureText: ${map['obscureText'] ?? 'false'},
+        obscuringCharacter: ${map['obscuringCharacter'] ?? '"•"'},
+        onChanged:(value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
+        onSaved: (value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
+        scrollPadding: const EdgeInsets.all(5.0),
         ${buildValidator(map['validators'] as List?)}
       ), // TextFormField
     ) // SizedBox
@@ -521,6 +571,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   String dropdownField(String elementName, String elementType, Map<String, dynamic> map, {String? parent}) {
     String items;
     String initialValue;
+
     if (map['type'] == 'enum') {
       items = '''
        ${elementType}.values.map((value) {
@@ -546,7 +597,7 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
 
     return '''
     SizedBox(
-      width: min(width, maxWidth * 10),
+      width:  200, // min(width, maxWidth * 10),
       child:DropdownButtonFormField(
           value: ${parent == null ? "_formData['$elementName'] ?? $initialValue" : "_formData['$parent']['$elementName'] ?? $initialValue"},
    

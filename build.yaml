@@ -20,6 +20,7 @@ builders:
       "fieldFilterChipBuilder",
       "fieldRadioBuilder",
       "fieldRangeSliderBuilder",
+      "fieldSliderBuilder",
       "fieldSwitchBuilder",
       "fieldTextAreaBuilder",
       "fieldClassBuilder"

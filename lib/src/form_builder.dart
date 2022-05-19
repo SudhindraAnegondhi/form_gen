@@ -172,10 +172,12 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
+                          const SizedBox(height: 15),
                           Expanded( // 6. Expanded
                             child: ListView(
                               shrinkWrap: true,
                               children: <Widget>[
+                                const SizedBox(height: 15),
                                 $formFieldList
                               ],
                             ),

@@ -19,7 +19,7 @@ class FieldTextAreaBuilder extends GeneratorForAnnotatedField<FieldTextArea> {
     final map = Helpers.annotationToJson<FieldText>(element, properties);
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context,Map<String, dynamic> _formData,  {required Function onSaved, required double width}) {
-          return ${textField(element.name,'String', map)};
+        return ${textFormField(element.name,'String', map)};
       }
     ''');
     return buffer.toString();

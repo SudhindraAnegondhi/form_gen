@@ -37,7 +37,7 @@ class FieldClassBuilder extends GeneratorForAnnotatedField<FieldClass> {
         case 'FieldText':
         case 'FieldTextArea':
         default:
-          buffer.writeln("${textField('${map['name']}', '${map['type'] ?? 'String'}', map, parent: element.name)},\n");
+          buffer.writeln("${textFormField('${map['name']}', '${map['type'] ?? 'String'}', map, parent: element.name)},\n");
           break;
       }
     }
