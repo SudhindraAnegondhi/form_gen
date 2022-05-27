@@ -406,31 +406,77 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
   }
 
   String rangeSliderField(String elementName, String elementType, Map<String, dynamic> map, {String? parent}) {
-    final rangeLabels = "RangeLabels(${map['labels'] ?? '_currentRangeValues.start.round().toString(),' + ' _currentRangeValues.end.round().toString(),'})";
-
     return '''
-      RangeValues _currentRageValues = RangeValues(${map['startValue'] ?? 0}, ${map['endValue'] ?? 0});
       return SizedBox(
-        height: 60,
-        child: RangeSlider(
-          activeColor: map['activeColor'] ?? Colors.blue,
-          divisions: ${map['divisions'] ?? 1},
-          inactiveColor: map['inactiveColor'] ?? Colors.grey,
-          labels: $rangeLabels,
-            min: ${map['min'] ?? 0},
-            max: ${map['max'] ?? 100},
-            onChanged:(RangeValues values)   {
-              setState(() {
-              _currentRangeValues = values;
-              });
-              onSaved('${elementName}', values, parent: '${parent ?? ''}');
-            },
-            onChangeStart: map['onChangeStart'],
-            onChangeEnd: map['onChangeEnd'],
-            sliderTheme: SliderTheme.of(context).copyWith(map['sliderTheme'] ?? {}),
-            values: _currentRangeValues,
-        ),
-      )
+        height: ${map['suffix'] == null ? '60' : '80'},
+        child: 
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ${map['suffix'] == null ? "const Text('${map['fieldLabel'] ?? elementName}')," : '''
+                Expanded(flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 25),
+                      const Text('${map['fieldLabel'] ?? elementName}'),
+                      Text(__semanticFormatter(_currentRangeValues), style: const TextStyle(fontSize: 10)),
+                    ],
+                  ),
+                ), //SizedBox
+                '''}
+                Expanded(
+                  flex: 4,
+                  child: SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    ${map['sliderThemeData']?['activeTrackColor'] != null ? 'activeTrackColor: ${map['sliderThemeData']?['activeTrackColor']},' : ''}
+                    ${map['sliderThemeData']?['inactiveTrackColor'] != null ? 'inactiveTrackColor: ${map['sliderThemeData']?['inactiveTrackColor']},' : ''}
+                    ${map['sliderThemeData']?['disabledActiveTrackColor'] != null ? 'disabledActiveTrackColor: ${map['sliderThemeData']?['disabledActiveTrackColor']},' : ''}
+                    ${map['sliderThemeData']?['disabledInactiveTrackColor'] != null ? 'disabledInactiveTrackColor: ${map['sliderThemeData']?['disabledInactiveTrackColor']},' : ''}
+                    ${map['sliderThemeData']?['activeTickMarkColor'] != null ? 'activeTickMarkColor: ${map['sliderThemeData']?['activeTickMarkColor']},' : ''}
+                    ${map['sliderThemeData']?['inactiveTickMarkColor'] != null ? 'inactiveTickMarkColor: ${map['sliderThemeData']?['inactiveTickMarkColor']},' : ''}
+                    ${map['sliderThemeData']?['disabledActiveTickMarkColor'] != null ? 'disabledActiveTickMarkColor: ${map['sliderThemeData']?['disabledActiveTickMarkColor']},' : ''}
+                    ${map['sliderThemeData']?['disabledInactiveTickMarkColor'] != null ? 'disabledInactiveTickMarkColor: ${map['sliderThemeData']?['disabledInactiveTickMarkColor']},' : ''}
+                    ${map['sliderThemeData']?['thumbColor'] != null ? 'thumbColor: ${map['sliderThemeData']?['thumbColor']},' : ''}
+                    ${map['sliderThemeData']?['disabledThumbColor'] != null ? 'disabledThumbColor: ${map['sliderThemeData']?['disabledThumbColor']},' : ''}
+                    ${map['sliderThemeData']?['overlayColor'] != null ? 'overlayColor: ${map['sliderThemeData']?['overlayColor']},' : ''}
+                    ${map['sliderThemeData']?['valueIndicatorColor'] != null ? 'valueIndicatorColor: ${map['sliderThemeData']?['valueIndicatorColor']},' : ''}
+                    ${map['sliderThemeData']?['overlayShape'] != null ? 'overlayShape: ${map['sliderThemeData']?['overlayShape']},' : ''}
+                    ${map['sliderThemeData']?['tickMarkShape'] != null ? 'tickMarkShape: ${map['sliderThemeData']?['tickMarkShape']},' : ''}
+                    ${map['sliderThemeData']?['thumbShape'] != null ? 'thumbShape: ${map['sliderThemeData']?['thumbShape']},' : ''}
+                    ${map['sliderThemeData']?['trackShape'] != null ? 'trackShape: ${map['sliderThemeData']?['trackShape']},' : ''}
+                    ${map['sliderThemeData']?['valueIndicatorShape'] != null ? 'valueIndicatorShape: ${map['sliderThemeData']?['valueIndicatorShape']},' : ''}
+                    ${map['sliderThemeData']?['rangeTickMarkShape'] != null ? 'rangeTickMarkShape: ${map['sliderThemeData']?['rangeTickMarkShape']},' : ''}
+                    ${map['sliderThemeData']?['rangeThumbShape'] != null ? 'rangeThumbShape: ${map['sliderThemeData']?['rangeThumbShape']},' : ''}
+                    ${map['sliderThemeData']?['rangeTrackShape'] != null ? 'rangeTrackShape: ${map['sliderThemeData']?['rangeTrackShape']},' : ''}
+                    ${map['sliderThemeData']?['rangeValueIndicatorShape'] != null ? 'rangeValueIndicatorShape: ${map['sliderThemeData']?['rangeValueIndicatorShape']},' : ''}
+                    ${map['sliderThemeData']?['showValueIndicator'] != null ? 'showValueIndicator: ${map['sliderThemeData']?['showValueIndicator']},' : ''}
+                    ${map['sliderThemeData']?['valueIndicatorTextStyle'] != null ? 'valueIndicatorTextStyle: ${map['sliderThemeData']?['valueIndicatorTextStyle']},' : ''}
+                    ${map['sliderThemeData']?['minThumbSeparation'] != null ? 'minThumbSeparation: ${map['sliderThemeData']?['minThumbSeparation']},' : ''}
+                    ${map['sliderThemeData']?['thumbSelector'] != null ? 'thumbSelector: ${map['sliderThemeData']?['thumbSelector']},' : ''}
+                    ${map['sliderThemeData']?['mouseCursor'] != null ? 'mouseCursor: ${map['sliderThemeData']?['mouseCursor']},' : ''}
+                  ),
+                  child: RangeSlider(
+                    activeColor: ${map['activeColor']},
+                    divisions: ${map['divisions']},
+                    inactiveColor: ${map['inactiveColor']},
+                    labels: rangeLabels,
+                    min: min,
+                    max: max,
+                    onChanged:(RangeValues values)   {
+                      __semanticFormatter(values);
+                    },
+                    onChangeStart: ${map['onChangeStart']},
+                    onChangeEnd: ${map['onChangeEnd']},
+                    values: _currentRangeValues,
+                  ),
+                ), // SliderTheme
+                ),
+              ],
+            ), // Row
+           
+      ) 
     ''';
   }
 
@@ -442,21 +488,36 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         child: Row(
           children: [
             const Text('${map['label'] ?? elementName}'),
-            Slider(
-              value: ${parent == null ? "_formData['$elementName'] ?? $initialValue" : "_formData['$parent']?['$elementName'] ?? $initialValue"},
-              min: ${map['min']},
-              max: ${map['max']},
-              divisions: ${map['divisions']},
-              label: semanticLabel,
-              onChanged:(value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
-              activeColor: ${map['activeColor'] ?? 'Colors.blue'},
-              inactiveColor: ${map['inactiveColor'] ?? 'Colors.grey'},
-              thumbColor: ${map['thumbColor'] ?? 'Colors.amber'},
-              mouseCursor: ${map['mouseCursor']},
-              semanticFormatterCallback: (double value) => __semanticFormatter(value),
-              onChangeStart: ${map['onChangeStart']},
-              onChangeEnd: ${map['onChangeEnd']},
-            ), // Slider
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                ${map['sliderThemeData']?['activeTrackColor'] != null ? 'activeTrackColor: ${map['sliderThemeData']?['activeTrackColor']},' : ''}
+                ${map['sliderThemeData']?['inactiveTrackColor'] != null ? 'inactiveTrackColor: ${map['sliderThemeData']?['inactiveTrackColor']},' : ''}
+                ${map['sliderThemeData']?['disabledActiveTrackColor'] != null ? 'disabledActiveTrackColor: ${map['sliderThemeData']?['disabledActiveTrackColor']},' : ''}
+                ${map['sliderThemeData']?['disabledInactiveTrackColor'] != null ? 'disabledInactiveTrackColor: ${map['sliderThemeData']?['disabledInactiveTrackColor']},' : ''}
+                ${map['sliderThemeData']?['activeTickMarkColor'] != null ? 'activeTickMarkColor: ${map['sliderThemeData']?['activeTickMarkColor']},' : ''}
+                ${map['sliderThemeData']?['inactiveTickMarkColor'] != null ? 'inactiveTickMarkColor: ${map['sliderThemeData']?['inactiveTickMarkColor']},' : ''}
+                ${map['sliderThemeData']?['disabledActiveTickMarkColor'] != null ? 'disabledActiveTickMarkColor: ${map['sliderThemeData']?['disabledActiveTickMarkColor']},' : ''}
+                ${map['sliderThemeData']?['disabledInactiveTickMarkColor'] != null ? 'disabledInactiveTickMarkColor: ${map['sliderThemeData']?['disabledInactiveTickMarkColor']},' : ''}
+                ${map['sliderThemeData']?['thumbColor'] != null ? 'thumbColor: ${map['sliderThemeData']?['thumbColor']},' : ''}
+                ${map['sliderThemeData']?['disabledThumbColor'] != null ? 'disabledThumbColor: ${map['sliderThemeData']?['disabledThumbColor']},' : ''}
+
+              ),
+              child: Slider(
+                value: ${parent == null ? "_formData['$elementName'] ?? $initialValue" : "_formData['$parent']?['$elementName'] ?? $initialValue"},
+                min: ${map['min']},
+                max: ${map['max']},
+                divisions: ${map['divisions']},
+                label: semanticLabel,
+                onChanged:(value) => onSaved('${elementName}', value, parent: '${parent ?? ''}'),
+                activeColor: ${map['activeColor'] ?? 'Colors.blue'},
+                inactiveColor: ${map['inactiveColor'] ?? 'Colors.grey'},
+                thumbColor: ${map['thumbColor'] ?? 'Colors.amber'},
+                mouseCursor: ${map['mouseCursor']},
+                semanticFormatterCallback: (double value) => __semanticFormatter(value),
+                onChangeStart: ${map['onChangeStart']},
+                onChangeEnd: ${map['onChangeEnd']},
+              ), // Slider
+            ), // SliderTheme
             ${(map['suffix'] ?? false) == true ? '' : 'Text(semanticLabel),'}
           ],
         ), // Row
@@ -486,7 +547,6 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
       case 'streetAddress':
         return 'TextInputType.streetAddress';
       case 'none':
-        return 'TextInputType.none';
       case 'text':
       default:
         return 'TextInputType.text';
@@ -509,10 +569,10 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
         autofocus: ${map['autoFocus'] ?? true},
         autovalidateMode: $autovalidateMode,
         buildCounter: ${map['buildCounter'] ?? null},
-        cursorColor: ${map['cursorColor'] ?? 'Colors.blue'},
-        cursorHeight: ${map['cursorHeight'] ?? 1.0},
-        cursorRadius: ${map['cursorRadius'] ?? 'const Radius.circular(2)'},
-        cursorWidth: ${map['cursorWidth'] ?? 1.0},
+        ${map['cursorColor'] != null ? 'cursorColor: ${map['cursorColor']},' : ''}
+        ${map['cursorHeight'] != null ? 'cursorHeight: ${map['cursorHeight']},' : ''}
+        ${map['cursorRadius'] != null ? 'cursorRadius: ${map['cursorRadius']},' : ''}
+        ${map['cursorWidth'] != null ? 'cursorWidth: ${map['cursorWidth']},' : ''}
         decoration: const InputDecoration(
           labelText: '${map['label'] ?? map['inputDecoration']?['labelText'] ?? elementName[0].toUpperCase() + elementName.substring(1)}',
           labelStyle: ${map['inputDecoration']?['labelStyle'] ?? 'TextStyle(fontSize: 16.0, color: Colors.black)'},

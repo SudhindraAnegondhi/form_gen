@@ -157,7 +157,8 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
                 width: min(widget.size?.width ?? MediaQuery.of(context).size.width, 600),
                 height: widget.size?.height ?? min(MediaQuery.of(context).size.height - (widget.showAppBar ? AppBar().preferredSize.height: 0), _formData.keys.toList().length  * 85),
                 color: widget.backgroundColor ?? Colors.white,
-                child: Card(  // 2. Card
+                child: Column(
+                Card(  // 2. Card
                   elevation: 15,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),

@@ -32,7 +32,7 @@ class FieldSliderBuilder extends GeneratorForAnnotatedField<FieldSlider> {
         return ${sliderField(element.name, element.type.toString(), map)};
       }
     ''');
-    print('Buffer: ${buffer.toString()}');
+   
     return buffer.toString();
   }
 }
