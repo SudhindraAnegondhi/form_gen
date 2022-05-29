@@ -75,13 +75,15 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
 
     buffer.write('''
         void onSaved(String key, dynamic value, {String? parent}) {
-          setState(() {
-            if (parent != null && parent.isNotEmpty) {
-              _formData[parent][key] = value;
-            } else {
-              _formData[key] = value;
-            }
-          });
+          if(mounted){
+            setState(() {
+              if (parent != null && parent.isNotEmpty) {
+                _formData[parent][key] = value;
+              } else {
+                _formData[key] = value;
+              }
+            });
+          }
         }
 
         Future<void> alert(String title, List<String> messages, {String? okButtonText}) async {
@@ -152,67 +154,70 @@ class FormBuilderGenerator extends GeneratorForAnnotation<FormBuilder> {
             min(MediaQuery.of(context).size.height - (widget.showAppBar ? AppBar().preferredSize.height : 0), _formData.keys.toList().length * 85),
         width: widget.size?.width ?? MediaQuery.of(context).size.width,
         child:
-           Center( // 0. Center
-              child: Container(  // 1. Container
-                width: min(widget.size?.width ?? MediaQuery.of(context).size.width, 600),
-                height: widget.size?.height ?? min(MediaQuery.of(context).size.height - (widget.showAppBar ? AppBar().preferredSize.height: 0), _formData.keys.toList().length  * 85),
-                color: widget.backgroundColor ?? Colors.white,
-                child: Column(
-                Card(  // 2. Card
-                  elevation: 15,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  shadowColor: Colors.black,
-                  child:  Padding(  // 3. Padding
-                    padding: const EdgeInsets.all(8.0),
-                  child:  Form( // 4. Form
-                      key: _formKey,
-                      child: Column( // 5. Column
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          const SizedBox(height: 15),
-                          Expanded( // 6. Expanded
-                            child: ListView(
-                              shrinkWrap: true,
-                              children: <Widget>[
-                                const SizedBox(height: 15),
-                                $formFieldList
-                              ],
-                            ),
-                         ), // 6. Expanded
-                          Padding( // 9. Padding
+           Center( 
+              child: 
+                Container(
+                  width: min(widget.size?.width ?? MediaQuery.of(context).size.width, 600),
+                  height: widget.size?.height ?? min(MediaQuery.of(context).size.height - (widget.showAppBar ? AppBar().preferredSize.height: 0), _formData.keys.toList().length  * 85),
+                  color: widget.backgroundColor ?? Colors.white,
+                  child: 
+                        Card(  
+                          elevation: 15,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          shadowColor: Colors.black,
+                          child:  Padding(  
                             padding: const EdgeInsets.all(8.0),
-                            child: Row( // 10. Row
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                ElevatedButton( // 11. ElevatedButton
-                                  child: const Text('Cancel'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ), // 11. ElevatedButton
-                                ElevatedButton( // 12. ElevatedButton
-                                  child: const Text('Save'),
-                                  onPressed: _formKey.currentState?.validate() ?? false  ?
-                                  () {
-                                    if (_formKey.currentState?.validate() ?? false) {
-                                      _formKey.currentState?.save();
-                                      Navigator.of(context).pop(${visitor.className}.fromJson(_formData));
-                                      }  
-                                  } : null,
-                                ), //  12. ElevatedButton
-                              ], // Children
-                            ), // 10. Row
-                          ), // 9. Padding
-                        ], //Children
-                      ), // 5. Column
-                    ), // 4. Form
-                  ), // 3. Padding
-                ), //  2. Card
-              ),  // 1. Container
+                            child:  Form(
+                              key: _formKey,
+                              child: 
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  const SizedBox(height: 15),
+                                  Expanded( 
+                                    child: ListView(
+                                      shrinkWrap: true,
+                                      children: <Widget>[
+                                        const SizedBox(height: 15),
+                                        $formFieldList
+                                      ],
+                                    ),
+                                  ),
+                                  Padding( 
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: 
+                                      Row( 
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          ElevatedButton( 
+                                            child: const Text('Cancel'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ), 
+                                          ElevatedButton( 
+                                            child: const Text('Save'),
+                                            onPressed: _formKey.currentState?.validate() ?? false  ?
+                                                () {
+                                                  if (_formKey.currentState?.validate() ?? false) {
+                                                    _formKey.currentState?.save();
+                                                    Navigator.of(context).pop(${visitor.className}.fromJson(_formData));
+                                                    }  
+                                                } : null,
+                                          ), 
+                                        ], 
+                                      ),
+                                  ), 
+                                ], 
+                              ), 
+                            ), // Form
+                          ), // Padding
+                        ), // Card
+                  ), // Container
               ), // 0. Center
             ), // SizedBox
           ); // Scaffold

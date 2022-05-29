@@ -34,12 +34,16 @@ class FieldRangeSliderBuilder extends GeneratorForAnnotatedField<FieldRangeSlide
           return '\${value.start.round().toString()} - \${value.end.round().toString()}';
         }
         
-        final double? start =double.tryParse(_formData['${element.name}']?.split(',').first ?? ${map['start']?.toString() ?? '0.0'});
-        final double? end = double.tryParse(_formData['${element.name}']?.split(',').last ?? ${map['end']?.toString() ?? '0.0'});
-        RangeValues _currentRangeValues = RangeValues(start ?? 0.0,end ?? 0.0);
-         __semanticFormatter(_currentRangeValues);
+         double? start =double.tryParse(_formData['${element.name}']?.split(',').first ?? \"${map['start']?.toString() ?? '0.0'}\");
+         double? end = double.tryParse(_formData['${element.name}']?.split(',').last ?? \"${map['end']?.toString() ?? '0.0'}\");
         const double? min =${map['min'] ?? 0.0};
         const double? max =${map['max'] ?? 100.0};
+        if((start ?? 0.0) < min) start = min;
+        if((end ?? 0.0) > max) end = max;
+        RangeValues _currentRangeValues = RangeValues(start ?? min,end ?? max);
+        __semanticFormatter(_currentRangeValues);
+        
+        _formData['${element.name}'] = _formData['${element.name}'] ?? '\${_currentRangeValues.start.round().toString()},\${_currentRangeValues.end.round().toString()}';
         ${rangeSliderField(element.name, element.type.toString(), map)};
       }
     ''');

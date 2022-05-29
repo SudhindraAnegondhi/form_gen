@@ -29,6 +29,7 @@ class FieldSliderBuilder extends GeneratorForAnnotatedField<FieldSlider> {
          return semanticLabel;
          '''}
         }
+        _formData['${element.name}'] = _formData['${element.name}'] ?? ${map['value'] ?? map['min'] ?? 0.0};
         return ${sliderField(element.name, element.type.toString(), map)};
       }
     ''');

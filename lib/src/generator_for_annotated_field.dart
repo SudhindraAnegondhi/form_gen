@@ -295,73 +295,85 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
 
   String choiceChipField(String elementName, String type, Map<String, dynamic> map, {String? parent}) {
     String items;
-    if (!map.containsKey('inputDecoration')) {
-      map['inputDecoration'] = {};
-    }
+    // choicechip properties
+    final properties = '''
+      autofocus: ${map['autofocus'] ?? false},
+      avatar: ${map['avatar']},
+      ${map['avatarBorder'] != null ? 'avatarBorder:${map['avatarBorder']})' : ''}
+      backgroundColor: ${map['backgroundColor']},
+      ${map['clipBehinity'] != null ? 'clipBehinity:${map['clipBehinity']})' : ''}
+      disabledColor: ${map['disabledColor']},
+      elevation: ${map['elevation']},
+      ${map['focusNode'] != null ? 'focusNode: FocusNode(),\n' : ''}
+      labelPadding: ${map['labelPadding']},
+      labelStyle: ${map['labelStyle']},
+      materialTapTargetSize: ${map['materialTapTargetSize']},
+      padding: ${map['padding']},
+      pressElevation: ${map['pressElevation']},
+      selectedColor: ${map['selectedColor']},
+      selectedShadowColor: ${map['selectedShadowColor']},
+      shape: ${map['shape']},
+      side: ${map['side']},
+      tooltip: ${map['tooltip']},
+      visualDensity: ${map['visualDensity']},
+''';
     if (map['type'] == 'enum') {
       items = '''
-        final List<Widget> chips = ${type}.values.map((value) {
-          return ChoiceChip(
-            label: Text(value.toString().split('.').last),
-            selected: _selectedIndex == index,
-            onSelected: (bool selected) {
-              setState(() {
-                _selectedIndex = selected ? index : null;
-              });
-              onSaved('${elementName}',  ${type}.values[_selectedIndex].split('.').last);
-            },
-        }).toList();
+       ${type}.values.map((value) {
+              return ChoiceChip(
+                $properties
+                label:  Text(value.toString().split('.').last),
+                selected: _selectedValue == value.toString().split('.').last,
+                onSelected: (bool selected) {
+                  _selectedValue = value.toString().split('.').last;
+                  onSaved('${elementName}', value);
+                },
+              );
+            }).toList()
       ''';
     } else {
-      items = '''
-       final List<Map<String, dynamic>> options = ${map['options'] ?? '[]'};
-        final List<Widget> chips = [];
-        for (var index = 0; index < options.length; index++) {
-          final option = options[index];
-          chips.add(ChoiceChip(
-            avatar: option['avatar'],
-            avatarBorder: option['avatarBorder'],
-            backgroundColor: option['backgroundColor'],
-            clipBehavior: option['clipBehavior'],
-            disabledColor: option['disabledColor'],
-            elevation: option['elevation'],
-            focusNode: option['focusNode'],
-            isEnabled: option['isEnabled'],
-            label: option['label'] ?? Text(option['value'].toString()),
-            labelStyle: option['labelStyle'],
-            labelPadding: option['labelPadding'],
-            materialTapTargetSize: option['materialTapTargetSize'],
-            selected: _selectedIndex == index,
-            onSelected: (bool selected) {
-              setState(() {
-                _selectedIndex = selected ? index : null;
-              });
-              onSaved('$elementName', options[_selectedIndex]['value']);
-            },
-            padding: option['padding'],
-            pressElevation: option['pressElevation'],
-            selectedColor: option['selectedColor'],
-            selectedShadowColor: option['selectedShadowColor'],
-            shadowColor: option['shadowColor'],
-            shape: option['shape'],
-            side: option['side'],
-            tooltip: option['tooltip'],
-            visualDensity: option['visualDensity'],
-          ));
-''';
+      items = '[' + (map['options'] as List<Map<String, dynamic>>).map((e) => '''ChoiceChip(
+                $properties
+                label:  Text("${e['label'] ?? e['value'].toString()}"),
+                selected: _selectedValue == "${e['value'].toString()}",
+                onSelected: (bool selected) {
+                  _selectedValue = "${e['value'].toString()}";
+                  onSaved('${elementName}', "${e['value'].toString()}");
+                },
+              )''').toList().join(',\n') + ']';
     }
+
+    return ''' 
+       var _selectedValue = _formData['${elementName}'];
+      return Wrap(
+        children: $items
+      );
+      ''';
+  }
+
+  String checkboxField(String elementName, String type, Map<String, dynamic> map, {String? parent}) {
     return '''
-   int _selectedIndex = $items.indexWhere((item) == _formData['$elementName']);
-        if (_selectedIndex == -1) {
-          _selectedIndex = 0;
-        }
-        return Wrap(
-          children: List<Widget>.generate(
-            chips.length, 
-            (int index) => chips[index]),
-          );
-      }
-''';
+      return Checkbox(
+        activeColor: ${map['activeColor']},
+        autofocus: ${map['autofocus'] ?? 'false'},
+        checkColor: ${map['checkColor']},
+        fillColor: ${map['fillColor']},
+        focusColor: ${map['focusColor']},
+        ${map['focusNode'] != null ? 'focusNode: FocusNode(),' : ''}
+        hoverColor: ${map['hoverColor']},
+        ${map['materialTapTargetSize'] != null ? 'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,' : ''}
+        ${map['mouseCursor'] != null ? 'mouseCursor: MouseCursor.defer,,' : ''}
+        overlayColor: ${map['overlayColor']},
+        shape: ${map['shape']},
+        side: ${map['side']},
+        splashRadius: ${map['splashRadius']},
+        tristate: ${map['tristate'] ?? 'false'},
+        value: _formData['$elementName'] ?? false,
+        onChanged: (bool? value) {
+          onSaved('$elementName', value, parent: '${parent ?? ''}');
+        },
+      );
+      ''';
   }
 
   String switchField(String elementName, String type, Map<String, dynamic> map, {String? parent}) {
