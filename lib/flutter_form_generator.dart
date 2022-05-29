@@ -21,7 +21,6 @@ Builder fieldDropdownBuilder(BuilderOptions options) => SharedPartBuilder([Field
 Builder fieldDropdownHideUnderlineBuilder(BuilderOptions options) =>
     SharedPartBuilder([FieldDropdownHideUnderlineBuilder()], 'field_dropdown_hide_underline_builder');
 
-Builder fieldFilterChipBuilder(BuilderOptions options) => SharedPartBuilder([FieldFilterChipBuilder()], 'field_filter_chip_builder');
 
 Builder fieldRadioBuilder(BuilderOptions options) => SharedPartBuilder([FieldRadioBuilder()], 'field_radio_group_builder');
 

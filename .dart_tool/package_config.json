@@ -297,7 +297,7 @@
     },
     {
       "name": "source_gen",
-      "rootUri": "file:///home/sudhindra/.pub-cache/hosted/pub.dartlang.org/source_gen-1.2.1",
+      "rootUri": "file:///home/sudhindra/.pub-cache/hosted/pub.dartlang.org/source_gen-1.2.2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -416,7 +416,7 @@
       "languageVersion": "2.16"
     }
   ],
-  "generated": "2022-05-29T09:33:53.007439Z",
+  "generated": "2022-05-29T09:49:46.210905Z",
   "generator": "pub",
   "generatorVersion": "2.17.1"
 }

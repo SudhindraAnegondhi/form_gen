@@ -9,7 +9,7 @@ packages:
     source: hosted
     version: "38.0.0"
   analyzer:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: analyzer
       url: "https://pub.dartlang.org"
@@ -37,7 +37,7 @@ packages:
     source: hosted
     version: "2.1.0"
   build:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: build
       url: "https://pub.dartlang.org"
@@ -177,7 +177,7 @@ packages:
     source: hosted
     version: "1.0.0"
   flutter_form_annotations:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: flutter_form_annotations
       url: "https://pub.dartlang.org"
@@ -345,12 +345,12 @@ packages:
     source: hosted
     version: "1.0.1"
   source_gen:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: source_gen
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.1"
+    version: "1.2.2"
   source_map_stack_trace:
     dependency: transitive
     description:

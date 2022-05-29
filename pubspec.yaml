@@ -1,18 +1,20 @@
 name: flutter_form_generator
 description: Provides Dart Build System builders for generating Flutter Forms
 version: 0.0.1
-homepage: https://bitbucket.org/IndeDude/form_generator
+homepage: https://github.com/SudhindraAnegondhi/flutter_form_generator.git
 
 environment:
   sdk: ">=2.16.0 <3.0.0"
 
 dependencies: 
+  analyzer: ^3.4.1
+  build: ^2.2.1
   dart_style: ^2.2.3
+  flutter_form_annotations: ^0.0.1-dev-01a
+  source_gen: ^1.2.2
  
 dev_dependencies:
-  build: ^2.2.1
-  source_gen:
-  flutter_form_annotations: ^0.0.1-dev-01a
+  
   build_test:
   build_runner:
   test: ^1.0.0
