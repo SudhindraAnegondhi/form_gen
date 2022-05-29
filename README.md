@@ -31,4 +31,4 @@ part of 'profile.dart';
 
 ### Features and Bugs
 
-Please file feature reuests and bugs @ [issue tracker]()
+Please file feature reuests and bugs @ [issue tracker]()# flutter_form_generator
