@@ -12,8 +12,7 @@ dependencies:
 dev_dependencies:
   build: ^2.2.1
   source_gen:
-  flutter_form_annotations:
-    path: ../flutter_form_annotations/
+  flutter_form_annotations: ^0.0.1-dev-01a
   build_test:
   build_runner:
   test: ^1.0.0

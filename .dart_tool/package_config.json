@@ -153,7 +153,7 @@
     },
     {
       "name": "flutter_form_annotations",
-      "rootUri": "../../flutter_form_annotations",
+      "rootUri": "file:///home/sudhindra/.pub-cache/hosted/pub.dartlang.org/flutter_form_annotations-0.0.1-dev-01a",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -416,7 +416,7 @@
       "languageVersion": "2.16"
     }
   ],
-  "generated": "2022-05-28T16:43:02.688653Z",
+  "generated": "2022-05-29T09:33:53.007439Z",
   "generator": "pub",
   "generatorVersion": "2.17.1"
 }

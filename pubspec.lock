@@ -179,10 +179,10 @@ packages:
   flutter_form_annotations:
     dependency: "direct dev"
     description:
-      path: "../flutter_form_annotations"
-      relative: true
-    source: path
-    version: "0.0.1"
+      name: flutter_form_annotations
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1-dev-01a"
   frontend_server_client:
     dependency: transitive
     description:
