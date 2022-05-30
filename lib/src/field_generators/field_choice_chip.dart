@@ -16,7 +16,6 @@ class FieldChoiceChipBuilder extends GeneratorForAnnotatedField<FieldChoiceChip>
     final buffer = StringBuffer();
     final properties = Helpers.getClassProperties(FieldChoiceChip);
     final map = Helpers.annotationToJson<FieldChoiceChip>(element, properties);
-    print('MAP: ${map.toString()}');
     buffer.write('''
       Widget ${element.name}FormField(BuildContext context, Map<String, dynamic> _formData, {required Function onSaved, required double width}) {
        ${choiceChipField(element.name, element.type.toString(), map)}

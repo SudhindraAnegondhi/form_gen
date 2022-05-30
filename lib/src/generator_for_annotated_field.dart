@@ -65,7 +65,6 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
       if (args is! Map) {
         throw Exception('Args is not a map: $args');
       }
-      //  print('validator:' + validator.toString());
       final String? customFunction = args.remove('function') as String?;
       final argList = args.keys.map((key) => '$key: ${_quoteIfNeeded(args[key])}').join(',');
       if (validator.keys.first == 'custom') {
@@ -82,7 +81,6 @@ abstract class GeneratorForAnnotatedField<AnnotationType> extends Generator {
           validatorList.add('result = _custom${index}(value, $argList);');
         }
       } else {
-        //  print('argList: $argList');
         validatorList.add('result = FormValidator.${validator.keys.first}(value, $argList);\n');
       }
       validatorList.add('''
