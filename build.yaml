@@ -1,13 +1,13 @@
 targets:
   $default:
     builders:
-      flutter_form_generator|flutter_form_annotations:
+      flutter_form_codegen|flutter_form_annotations:
         enabled: true
 
 builders:
   generators:
-    target: ":flutter_form_generator"
-    import: "package:flutter_form_generator/builder.dart"
+    target: ":form_gen"
+    import: "package:form_gen/form_gen.dart"
     builder_factories: [ 
       "formBuilder", 
       #"fieldTextBuilder", 
@@ -17,7 +17,6 @@ builders:
       "fieldDatePickerBuilder",
       "fieldDropdownBuilder",
       "fieldDropdownHideUnderlineBuilder",
-      "fieldFilterChipBuilder",
       "fieldRadioBuilder",
       "fieldRangeSliderBuilder",
       "fieldSliderBuilder",

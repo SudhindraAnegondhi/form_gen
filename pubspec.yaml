@@ -1,5 +1,6 @@
-name: flutter_form_generator
-description: Provides Dart Build System builders for generating Flutter Forms
+name: form_gen
+description: Provides  [Dart Build System] builder for handling Flutter Form generation for Flutter models.The builders generate code when they find *classes* and *members* annotated with classes defined in package flutter_form_annotations.To generate a Flutter Form code for a class, annotate it with [formBuilder]. You can provide arguments to [formBuilder] to configure the generated code. You can also customize the individual fields by annotating them with one of the **Field** decorators, like [FieldText], [FieldDropdown], and providing custom arguments. The target class should contain 2 methods 'toJson` and `fromJson`, as it treats the class as *immutable*. You may either code these methods by hand or use the [json_serializable](https://pub.dev/packages/json_serializable) or [freezed](https://pub.dev/packages/freezed) package.
+
 version: 0.0.1-dev-01b
 homepage: https://github.com/SudhindraAnegondhi/flutter_form_generator.git
 

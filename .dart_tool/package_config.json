@@ -410,13 +410,13 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "flutter_form_generator",
+      "name": "form_gen",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "2.16"
     }
   ],
-  "generated": "2022-05-30T03:45:21.389959Z",
+  "generated": "2022-05-30T04:55:49.946930Z",
   "generator": "pub",
   "generatorVersion": "2.17.1"
 }

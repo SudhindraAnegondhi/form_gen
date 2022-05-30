@@ -1,4 +1,4 @@
-# Flutter Form Generator
+# Form Gen
 
 Provides  [Dart Build System]() builder for handling Flutter Form generation for Flutter models.
 
