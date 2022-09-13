@@ -1,0 +1,31 @@
+targets:
+  $default:
+    builders:
+      form_gen|flutter_form_annotations:
+        enabled: true
+
+builders:
+  generators:
+    target: ":form_gen"
+    import: "package:form_gen/builder.dart"
+    builder_factories: [ 
+      "formBuilder", 
+      #"fieldTextBuilder", 
+      "fieldCheckboxBuilder",
+      "fieldChoiceChipBuilder",
+      "fieldDateRangePickerBuilder",
+      "fieldDatePickerBuilder",
+      "fieldDropdownBuilder",
+      "fieldDropdownHideUnderlineBuilder",
+      "fieldFilterChipBuilder",
+      "fieldRadioBuilder",
+      "fieldRangeSliderBuilder",
+      "fieldSliderBuilder",
+      "fieldSwitchBuilder",
+      "fieldTextAreaBuilder",
+      "fieldClassBuilder"
+      ]
+    build_extensions: { ".dart": [".g.dart"] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
