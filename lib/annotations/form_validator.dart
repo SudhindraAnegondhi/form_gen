@@ -45,6 +45,8 @@ enum FieldValidator {
   url,
 }
 
+/// Provides a number of validators for use with the [Field] annotation.
+
 class FormValidator {
   /// Checks if the  value is alphabetic, i.e., contains only letters.
   static String? alpha(String? value, {String? message}) =>

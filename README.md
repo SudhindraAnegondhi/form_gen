@@ -20,7 +20,7 @@ delete example/lib/profile.g.dart
 open integrated teminal and issue the following command
 
 ```sh
-$ flutter pub run build_runner build
+$ flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 This step generates example/lib/profile.g.dart containing the code for the Profile screen `ProfileForm()` widget.

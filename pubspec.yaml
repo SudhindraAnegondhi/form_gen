@@ -1,5 +1,5 @@
 name: form_gen
-description: Form Generator for flutter
+description: Form Generator for flutter, given a model class generates a flutter form for the model.
 version: 0.0.1
 homepage: https://github.com/SudhindraAnegondhi/form_gen.git
 
@@ -8,12 +8,14 @@ environment:
  
 
 dependencies:
+   analyzer: ^4.7.0
+   build: ^2.2.1
    dart_style: ^2.2.3
+   source_gen: ^1.2.3
 
 dev_dependencies:
-  build: ^2.2.1
-  source_gen:
   build_test:
   build_runner:
   test: ^1.0.0
+  lints: ^2.0.0
 

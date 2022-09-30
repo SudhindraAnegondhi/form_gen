@@ -319,16 +319,16 @@ class FieldDateRangePicker {
 }
 
 /// A dropdown button lets the user select from a number of items. The button shows the currently selected item as well as an arrow that opens a menu for selecting another item.
-/// 
+///
 /// Each item is represented by a [DropdownMenuItem] widget. The type  is the type of the values/keys used to identify each menu item and determine which item is currently selected. The type of the value is the type of the value associated with each menu item.
-/// 
+///
 /// The dropdown button itself does not maintain the current value. Instead, when the user selects an item, the dropdown button calls the [onChanged] callback. Most widgets that use a dropdown button will listen for the [onChanged] callback and rebuild the dropdown button with a new [value] to update the currently selected item.
 class FieldDropdown {
   final String? label;
   final String? hint;
   final bool? enabled;
   final String type; // enum, text, number, email, password, phone, date, time, dateTime, dateTimeLocal, month, week, time, color
-  final List<Map<String, dynamic>> options;
+  final List<Map<String, dynamic>>? options;
   final dynamic initialValue;
   final double? sequence;
 
@@ -337,11 +337,12 @@ class FieldDropdown {
     this.hint,
     this.enabled,
     required this.type,
-    required this.options,
+    this.options,
     this.initialValue,
     this.sequence,
   });
 }
+
 /// Shows a dropdown field hiding the underline.
 class FieldDropdownHideUnderline {
   final String? label;
@@ -349,11 +350,12 @@ class FieldDropdownHideUnderline {
   final bool? enabled;
   final Map<String, dynamic>? inputDecoration;
   final String type; // enum, text, number, email, password, phone, date, time, dateTime, dateTimeLocal, month, week, time, color
-  final List<Map<String, dynamic>> options;
+  final List<Map<String, dynamic>>? options;
   final dynamic initialValue;
   final double? sequence;
 
-  const FieldDropdownHideUnderline({this.label, this.hint, this.enabled, this.inputDecoration, required this.type, required this.options, this.initialValue, this.sequence});
+  const FieldDropdownHideUnderline(
+      {this.label, this.hint, this.enabled, this.inputDecoration, required this.type, this.options, this.initialValue, this.sequence});
 }
 
 /// A Material Design radio button.
@@ -373,6 +375,7 @@ class FieldRadio {
   FieldRadio(this.type, this.activeColor, this.autofocus, this.fillColor, this.focusColor, this.focusNode, this.groupValue, this.hoverColor,
       this.materialTapTargetSize, this.mouseCursor, this.onChanged, this.overlayColor, this.splashRadius, this.toggleable, this.value, this.visualDensity);
 }
+
 /// Used to select a range of values within a set of values.
 class FieldRangeSlider {
   final String? activeColor;
@@ -382,42 +385,6 @@ class FieldRangeSlider {
   final String? fieldLabel;
   final bool? suffix; // if true show current values
   final String? onChanged, OnChangeStart, OnChangeEnd, semanticFormatter;
-
-  ///
-  /// one or more if [labelTextStyle, activeTrackColor, inactiveTrackColor, activeTickMarkColor, inactiveTickMarkColor, thumbColor, overlayColor, valueIndicatorColor, thumbShape, valueIndicatorShape, showValueIndicator]
-  /// sliderComponentShape: one of  [RectangularSliderThumbShape, RoundSliderThumbShape, RoundSliderTickMarkShape, RoundSliderOverlayShape, SliderComponentShape]
-  /// sliderTrackShape: onw od [RectangularSliderTrackShape, RoundSliderTrackShape]
-  /// rangeSliderTickMarkShape: one of [RoundSliderTickMarkShape, RoundSliderTrackShape]
-  /// rangeSliderValueIndicatorShape: one of [PaddleSliderValueIndicatorShape, PaddleSliderValueIndicatorShape]
-  /// rangeSldertickMarkShape: one of [RoundSliderTickMarkShape, RoundSliderTrackShape]
-  ///  double? trackHeight,
-  /// Color? activeTrackColor,
-  /// Color? inactiveTrackColor,
-  /// Color? disabledActiveTrackColor,
-  /// Color? disabledInactiveTrackColor,
-  /// Color? activeTickMarkColor,
-  /// Color? inactiveTickMarkColor,
-  /// Color? disabledActiveTickMarkColor,
-  /// Color? disabledInactiveTickMarkColor,
-  /// Color? thumbColor,
-  /// Color? overlappingShapeStrokeColor,
-  /// Color? disabledThumbColor,
-  /// Color? overlayColor,
-  /// Color? valueIndicatorColor,
-  /// SliderComponentShape? overlayShape,
-  /// SliderTickMarkShape? tickMarkShape,
-  /// SliderComponentShape? thumbShape,
-  /// SliderTrackShape? trackShape,
-  /// SliderComponentShape? valueIndicatorShape,
-  /// RangeSliderTickMarkShape? rangeTickMarkShape,
-  /// RangeSliderThumbShape? rangeThumbShape,
-  /// RangeSliderTrackShape? rangeTrackShape,
-  /// RangeSliderValueIndicatorShape? rangeValueIndicatorShape,
-  /// ShowValueIndicator? showValueIndicator,
-  /// TextStyle? valueIndicatorTextStyle,
-  /// double? minThumbSeparation,
-  /// Thumb? Function(TextDirection, RangeValues, double, Size, Size, double)? thumbSelector,
-  /// MaterialStateProperty<MouseCursor?>? mouseCursor,
 
   final Map<String, dynamic>?
       sliderThemeData; // [labelTextStyle, activeTrackColor, inactiveTrackColor, activeTickMarkColor, inactiveTickMarkColor, thumbColor, overlayColor, valueIndicatorColor, thumbShape, valueIndicatorShape, showValueIndicator]
@@ -481,13 +448,14 @@ class FieldSlider {
     this.value,
   });
 }
+
 /// Switch is a two state button that can be either on or off.
 class FieldSwitch {
   final String? label;
   final String? hint;
   final bool? enabled;
   final Map<String, dynamic>? inputDecoration;
-  final String? type; 
+  final String? type;
   final dynamic initialValue;
   final double? sequence;
   final String? icon;

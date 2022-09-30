@@ -142,6 +142,8 @@ class Profile {
     min: 30000.0,
     divisions: 10,
     suffix: true,
+    start: 35000.0,
+    end: 120000.0,
   )
   final String salaryRange;
 
